@@ -2,8 +2,6 @@
 
 # 📱 Android APK coming very soon!
 
-**An Android version of KishiDS is on the way.**
-
 ---
 
 **Kishi DualShock**: custom firmware that makes the **Razer Kishi V1 (RZ06-0290)** show up as a wired **DualShock 4**, plus a Windows app to
