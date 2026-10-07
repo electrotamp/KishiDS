@@ -1,0 +1,49 @@
+<UserControl x:Class="KishiDS.Pages.IdentityPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:KishiDS.Controls">
+    <ScrollViewer>
+        <Grid Margin="0,0,14,60">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="760"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <StackPanel>
+            <TextBlock Text="Identity" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="How the controller introduces itself to your PC or phone." Style="{StaticResource Caption}" Margin="0,4,0,0"/>
+
+            <Border Style="{StaticResource Card}" Margin="0,22,0,0">
+                <StackPanel>
+                    <TextBlock Text="Names" Style="{StaticResource SectionTitle}" Margin="0,0,0,16"/>
+                    <TextBlock Text="Device name" FontWeight="SemiBold" Margin="0,0,0,6"/>
+                    <TextBox Style="{StaticResource ModernTextBox}" Text="{Binding S.Product, UpdateSourceTrigger=LostFocus}" MaxLength="31" Margin="0"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Fixed by the firmware" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Text="These can't be changed. The USB IDs make the controller identify as a standard wired gamepad, and changing them would break that. The serial number always comes from the controller itself." Style="{StaticResource Caption}" Margin="0,3,0,16" TextWrapping="Wrap"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="16"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Text="Vendor ID" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                            <TextBlock Text="{Binding S.VidText}" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextDimBrush}"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Text="Product ID" FontWeight="SemiBold" Margin="0,0,0,2"/>
+                            <TextBlock Text="{Binding S.PidText}" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextDimBrush}"/>
+                        </StackPanel>
+                    </Grid>
+                    <TextBlock Text="Manufacturer" FontWeight="SemiBold" Margin="0,14,0,2"/>
+                    <TextBlock Text="{Binding S.Manufacturer}" Foreground="{StaticResource TextDimBrush}"/>
+                    <TextBlock Text="Serial number" FontWeight="SemiBold" Margin="0,14,0,2"/>
+                    <TextBlock Text="{Binding SerialText}" FontFamily="{StaticResource MonoFont}" Foreground="{StaticResource TextDimBrush}"/>
+                    <TextBlock Text="This is your controller's own serial number, the one printed on the sticker on its back." Style="{StaticResource Caption}" Margin="0,3,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            </Border>
+
+
+
+            <Button Style="{StaticResource GhostButton}" Content="Reset device name to default" Click="ResetIdentity_Click" HorizontalAlignment="Left" Margin="0,14,0,0"/>
+        </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,64 @@
+<UserControl x:Class="KishiDS.Pages.SticksPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:KishiDS.Controls"
+             xmlns:core="clr-namespace:KishiDS.Core">
+    <ScrollViewer>
+        <Grid Margin="0,0,14,60">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="1040"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <StackPanel>
+            <TextBlock Text="Sticks" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="Tune how each stick responds. The preview follows your real stick." Style="{StaticResource Caption}" Margin="0,4,0,0"/>
+
+            <UniformGrid Columns="2" Margin="0,22,0,0">
+                <!-- Left stick -->
+                <Border Style="{StaticResource Card}" Margin="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="Left stick" Style="{StaticResource SectionTitle}"/>
+                        <Grid Margin="0,16,0,18">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="18"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <c:StickPreview Height="170" Dead="{Binding S.LeftDead}" Outer="{Binding S.LeftOuter}" X="{Binding Live.Lx}" Y="{Binding Live.Ly}"/>
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                <TextBlock Text="RESPONSE" Style="{StaticResource Eyebrow}" Margin="0,0,0,8"/>
+                                <c:CurveGraph Height="110" Dead="{Binding S.LeftDead}" Outer="{Binding S.LeftOuter}" Curve="{Binding S.LeftCurve}"/>
+                            </StackPanel>
+                        </Grid>
+                        <c:SliderRow Label="Deadzone" Unit="%" Minimum="0" Maximum="50" Value="{Binding S.LeftDead, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="Ignore small movements around the centre."/>
+                        <c:SliderRow Label="Full-scale point" Unit="%" Minimum="50" Maximum="100" Value="{Binding S.LeftOuter, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="How far you push before the output reaches 100%."/>
+                        <TextBlock Text="Curve" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                        <ListBox Style="{StaticResource Segmented}" ItemsSource="{x:Static core:ConfigLayout.Curves}" SelectedIndex="{Binding S.LeftCurve, Mode=TwoWay}" Margin="0,0,0,20"/>
+                        <c:ToggleRow Label="Invert horizontal" IsOn="{Binding S.InvertLx, Mode=TwoWay}"/>
+                        <c:ToggleRow Label="Invert vertical" IsOn="{Binding S.InvertLy, Mode=TwoWay}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Right stick -->
+                <Border Style="{StaticResource Card}" Margin="10,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Right stick" Style="{StaticResource SectionTitle}"/>
+                        <Grid Margin="0,16,0,18">
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="170"/><ColumnDefinition Width="18"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                            <c:StickPreview Height="170" Dead="{Binding S.RightDead}" Outer="{Binding S.RightOuter}" X="{Binding Live.Rx}" Y="{Binding Live.Ry}"/>
+                            <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                                <TextBlock Text="RESPONSE" Style="{StaticResource Eyebrow}" Margin="0,0,0,8"/>
+                                <c:CurveGraph Height="110" Dead="{Binding S.RightDead}" Outer="{Binding S.RightOuter}" Curve="{Binding S.RightCurve}"/>
+                            </StackPanel>
+                        </Grid>
+                        <c:SliderRow Label="Deadzone" Unit="%" Minimum="0" Maximum="50" Value="{Binding S.RightDead, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="Ignore small movements around the centre."/>
+                        <c:SliderRow Label="Full-scale point" Unit="%" Minimum="50" Maximum="100" Value="{Binding S.RightOuter, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="How far you push before the output reaches 100%."/>
+                        <TextBlock Text="Curve" FontWeight="SemiBold" Margin="0,0,0,8"/>
+                        <ListBox Style="{StaticResource Segmented}" ItemsSource="{x:Static core:ConfigLayout.Curves}" SelectedIndex="{Binding S.RightCurve, Mode=TwoWay}" Margin="0,0,0,20"/>
+                        <c:ToggleRow Label="Invert horizontal" IsOn="{Binding S.InvertRx, Mode=TwoWay}"/>
+                        <c:ToggleRow Label="Invert vertical" IsOn="{Binding S.InvertRy, Mode=TwoWay}"/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0" Padding="24,20,24,6">
+                <c:ToggleRow Label="Swap left and right sticks" Hint="The left stick drives the right stick's output and the other way round."
+                             IsOn="{Binding S.SwapSticks, Mode=TwoWay}"/>
+            </Border>
+        </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

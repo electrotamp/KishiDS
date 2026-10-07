@@ -1,0 +1,85 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <!-- Dark palette. Both palette files define the same keys; Theme.xaml builds the shared brushes from them. -->
+    <Color x:Key="BgColor">#080A11</Color>
+    <Color x:Key="PanelColor">#0C0F18</Color>
+    <Color x:Key="CardColor">#111623</Color>
+    <Color x:Key="CardHiColor">#171D2C</Color>
+    <Color x:Key="FieldColor">#0B0E16</Color>
+    <Color x:Key="StrokeColor">#1F2638</Color>
+    <Color x:Key="StrokeHiColor">#2F3850</Color>
+    <Color x:Key="TextColor">#EEF1F6</Color>
+    <Color x:Key="TextDimColor">#98A3B8</Color>
+    <Color x:Key="TextFaintColor">#626D83</Color>
+    <Color x:Key="AccentColor">#3B82F6</Color>
+    <Color x:Key="AccentHiColor">#5B9AFF</Color>
+    <Color x:Key="AccentLoColor">#2F6FDB</Color>
+    <Color x:Key="AccentSoftColor">#17224A</Color>
+    <Color x:Key="VioletColor">#8B5CF6</Color>
+    <Color x:Key="GoodColor">#34D399</Color>
+    <Color x:Key="WarnColor">#FBBF24</Color>
+    <Color x:Key="BadColor">#F87171</Color>
+    <Color x:Key="HoverColor">#1E232D</Color>
+    <Color x:Key="HoverSoftColor">#171B23</Color>
+    <Color x:Key="PressColor">#1A1F29</Color>
+    <Color x:Key="ControlHoverColor">#262C39</Color>
+    <Color x:Key="StrokeHoverColor">#3D4659</Color>
+    <Color x:Key="FlyBgColor">#1B1F28</Color>
+    <Color x:Key="FlyHiColor">#232936</Color>
+    <Color x:Key="ThumbOffColor">#C9D1DF</Color>
+    <Color x:Key="ToggleOffTrackColor">#262C39</Color>
+    <Color x:Key="ToggleOffBorderColor">#323949</Color>
+    <Color x:Key="ScrollThumbColor">#2A303D</Color>
+    <Color x:Key="NavSelBgColor">#1A2650</Color>
+    <Color x:Key="NavSelTextColor">#EEF1F6</Color>
+    <Color x:Key="NavSelIconColor">#5B9AFF</Color>
+    <Color x:Key="BrandTextColor">#6E7BFF</Color>
+    <Color x:Key="GlowBlueColor">#2E3B82F6</Color>
+    <Color x:Key="GlowBlueOffColor">#003B82F6</Color>
+    <Color x:Key="GlowVioletColor">#228B5CF6</Color>
+    <Color x:Key="GlowVioletOffColor">#008B5CF6</Color>
+    <Color x:Key="IconTileBgColor">#1B2750</Color>
+    <Color x:Key="IconTileStrokeColor">#2A3A70</Color>
+    <Color x:Key="IconTileFgColor">#6FA2FF</Color>
+    <Color x:Key="Tile1EyebrowColor">#9A93C8</Color>
+    <Color x:Key="Tile1IconColor">#A78BFA</Color>
+    <Color x:Key="Tile2EyebrowColor">#8499C4</Color>
+    <Color x:Key="Tile2IconColor">#60A5FA</Color>
+    <Color x:Key="Tile3EyebrowColor">#7FA6BF</Color>
+    <Color x:Key="Tile3IconColor">#38BDF8</Color>
+    <Color x:Key="WarnSoftColor">#2A2412</Color>
+    <Color x:Key="GoodSoftColor">#10281F</Color>
+    <Color x:Key="DotIdleColor">#2E3544</Color>
+    <Color x:Key="PanelInsetColor">#11141A</Color>
+    <SolidColorBrush x:Key="StageBrush" Color="#080A11"/>
+    <SolidColorBrush x:Key="SidebarBrush" Color="#D90B0E17"/>
+    <SolidColorBrush x:Key="MiniCardBrush" Color="#14181F"/>
+    <SolidColorBrush x:Key="MiniCardStroke" Color="#222A38"/>
+    <SolidColorBrush x:Key="PillBrush" Color="#B30F131C"/>
+    <SolidColorBrush x:Key="PillStroke" Color="#232B3B"/>
+    <LinearGradientBrush x:Key="HeroBrush" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#E6141926" Offset="0"/><GradientStop Color="#E60F131E" Offset="1"/></LinearGradientBrush>
+    <LinearGradientBrush x:Key="Tile1Brush" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#2C2356" Offset="0"/><GradientStop Color="#171A34" Offset="1"/></LinearGradientBrush>
+    <SolidColorBrush x:Key="Tile1Stroke" Color="#3A2F72"/>
+    <LinearGradientBrush x:Key="Tile2Brush" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#182C55" Offset="0"/><GradientStop Color="#121D38" Offset="1"/></LinearGradientBrush>
+    <SolidColorBrush x:Key="Tile2Stroke" Color="#25427A"/>
+    <LinearGradientBrush x:Key="Tile3Brush" StartPoint="0,0" EndPoint="1,1"><GradientStop Color="#143149" Offset="0"/><GradientStop Color="#111F31" Offset="1"/></LinearGradientBrush>
+    <SolidColorBrush x:Key="Tile3Stroke" Color="#1F4A66"/>
+    <SolidColorBrush x:Key="FlyBrush" Color="{StaticResource FlyBgColor}"/>
+    <SolidColorBrush x:Key="FlyHiBrush" Color="{StaticResource FlyHiColor}"/>
+    <SolidColorBrush x:Key="ThumbOffBrush" Color="{StaticResource ThumbOffColor}"/>
+    <SolidColorBrush x:Key="ScrollThumbBrush" Color="{StaticResource ScrollThumbColor}"/>
+    <SolidColorBrush x:Key="DotIdleBrush" Color="{StaticResource DotIdleColor}"/>
+    <SolidColorBrush x:Key="WarnSoftBrush" Color="{StaticResource WarnSoftColor}"/>
+    <SolidColorBrush x:Key="GoodSoftBrush" Color="{StaticResource GoodSoftColor}"/>
+    <SolidColorBrush x:Key="PanelInsetBrush" Color="{StaticResource PanelInsetColor}"/>
+    <SolidColorBrush x:Key="BrandBrush" Color="{StaticResource BrandTextColor}"/>
+    <SolidColorBrush x:Key="IconTileBgBrush" Color="{StaticResource IconTileBgColor}"/>
+    <SolidColorBrush x:Key="IconTileStrokeBrush" Color="{StaticResource IconTileStrokeColor}"/>
+    <SolidColorBrush x:Key="IconTileFgBrush" Color="{StaticResource IconTileFgColor}"/>
+    <SolidColorBrush x:Key="Tile1EyebrowBrush" Color="{StaticResource Tile1EyebrowColor}"/>
+    <SolidColorBrush x:Key="Tile1IconBrush" Color="{StaticResource Tile1IconColor}"/>
+    <SolidColorBrush x:Key="Tile2EyebrowBrush" Color="{StaticResource Tile2EyebrowColor}"/>
+    <SolidColorBrush x:Key="Tile2IconBrush" Color="{StaticResource Tile2IconColor}"/>
+    <SolidColorBrush x:Key="Tile3EyebrowBrush" Color="{StaticResource Tile3EyebrowColor}"/>
+    <SolidColorBrush x:Key="Tile3IconBrush" Color="{StaticResource Tile3IconColor}"/>
+</ResourceDictionary>

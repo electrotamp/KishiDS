@@ -1,0 +1,133 @@
+using System.Collections.ObjectModel;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+
+namespace KishiDS.Core;
+
+/// <summary>One row of the button-mapping table: a physical Kishi button and the DS4 output it triggers.</summary>
+public sealed class ButtonRow : ObservableObject
+{
+    private readonly ConfigBlock _cfg;
+    private bool _pressed;
+
+    public ButtonRow(ConfigBlock cfg, int index)
+    {
+        _cfg = cfg;
+        Index = index;
+        Name = ConfigLayout.KishiButtons[index];
+    }
+
+    public int Index { get; }
+    public string Name { get; }
+    private static readonly string[] Pretty = ConfigLayout.Outputs.Select(o => o switch
+    {
+        "None" => "Disabled",
+        "DpadUp" => "D-pad Up",
+        "DpadDown" => "D-pad Down",
+        "DpadLeft" => "D-pad Left",
+        "DpadRight" => "D-pad Right",
+        "PS" => "PS button",
+        "Touchpad" => "Touchpad click",
+        _ => o,
+    }).ToArray();
+
+    public IReadOnlyList<string> Options => Pretty;
+
+    public int Output
+    {
+        get => _cfg.Get("button_map", Index);
+        set { _cfg.Set("button_map", value, Index); Raise(); Raise(nameof(IsDefault)); }
+    }
+
+    public bool IsDefault => Output == ConfigBlock.Field("button_map").Default[Index];
+
+    /// <summary>True while the physical button is held (from firmware telemetry).</summary>
+    public bool Pressed { get => _pressed; set => Set(ref _pressed, value); }
+
+    public void Refresh() { Raise(nameof(Output)); Raise(nameof(IsDefault)); }
+}
+
+/// <summary>Typed, bindable view of the config block.  Property names map to schema fields (LeftDead -> left_dead).</summary>
+public sealed class Settings : ObservableObject
+{
+    public ConfigBlock Cfg { get; }
+    public ObservableCollection<ButtonRow> Buttons { get; } = new();
+
+    public Settings(ConfigBlock cfg)
+    {
+        Cfg = cfg;
+        for (int i = 0; i < ConfigLayout.KishiButtons.Length; i++) Buttons.Add(new ButtonRow(cfg, i));
+        cfg.Changed += _ =>
+        {
+            Raise(string.Empty);                  // every property may have changed
+            foreach (var b in Buttons) b.Refresh();
+        };
+    }
+
+    private static string Snake(string pascal)
+    {
+        var sb = new System.Text.StringBuilder();
+        for (int i = 0; i < pascal.Length; i++)
+        {
+            char c = pascal[i];
+            if (char.IsUpper(c) && i > 0) sb.Append('_');
+            sb.Append(char.ToLowerInvariant(c));
+        }
+        return sb.ToString();
+    }
+
+    private int Num([CallerMemberName] string? p = null) => Cfg.Get(Snake(p!));
+    private void Num(int v, [CallerMemberName] string? p = null) => Cfg.Set(Snake(p!), v);
+    private bool Bit(int bit, string field) => Cfg.GetBit(field, bit);
+    private void Bit(int bit, string field, bool on) => Cfg.SetBit(field, bit, on);
+
+    public int RemappedCount => Buttons.Count(b => !b.IsDefault);
+    public string LedModeName => ConfigLayout.LedModes[Math.Clamp(LedMode, 0, ConfigLayout.LedModes.Length - 1)];
+
+    // ---- Sticks ----
+    public int LeftDead { get => Num(); set => Num(value); }
+    public int RightDead { get => Num(); set => Num(value); }
+    public int LeftOuter { get => Num(); set => Num(value); }
+    public int RightOuter { get => Num(); set => Num(value); }
+    public int LeftCurve { get => Num(); set => Num(value); }
+    public int RightCurve { get => Num(); set => Num(value); }
+    public bool InvertLx { get => Bit(0, "stick_flags"); set => Bit(0, "stick_flags", value); }
+    public bool InvertLy { get => Bit(1, "stick_flags"); set => Bit(1, "stick_flags", value); }
+    public bool InvertRx { get => Bit(2, "stick_flags"); set => Bit(2, "stick_flags", value); }
+    public bool InvertRy { get => Bit(3, "stick_flags"); set => Bit(3, "stick_flags", value); }
+    public bool SwapSticks { get => Bit(4, "stick_flags"); set => Bit(4, "stick_flags", value); }
+
+    // ---- Triggers ----
+    public int TrigThresh { get => Num(); set => Num(value); }
+    public int L2Dead { get => Num(); set => Num(value); }
+    public int R2Dead { get => Num(); set => Num(value); }
+    public int L2Outer { get => Num(); set => Num(value); }
+    public int R2Outer { get => Num(); set => Num(value); }
+    public bool SwapTriggers { get => Bit(0, "trig_flags"); set => Bit(0, "trig_flags", value); }
+    public bool DigitalTriggers { get => Bit(1, "trig_flags"); set => Bit(1, "trig_flags", value); }
+
+    // ---- D-pad ----
+    public int DpadMode { get => Num(); set => Num(value); }
+    public int SocdMode { get => Num(); set => Num(value); }
+
+    // ---- LED ----
+    public int LedMode { get => Num(); set => Num(value); }
+    public int LedBrightness { get => Num(); set => Num(value); }
+    public int LedBreath { get => Num(); set => Num(value); }
+    public double LedBreathSeconds { get => LedBreath / 10.0; set => LedBreath = (int)Math.Round(value * 10); }
+    public bool LedBreathVisible => LedMode == 2;
+
+    // ---- USB identity ----
+    public string Manufacturer => Cfg.GetString("manufacturer");
+    public string Product { get => Cfg.GetString("product"); set => Cfg.SetString("product", value); }
+    public int PollMs { get => Num(); set => Num(value); }
+    public int PollHz => 1000 / Math.Max(1, PollMs);
+
+    // VID/PID are locked in the firmware (they must stay a DualShock 4); shown read-only on the Overview.
+    public string VidText => Cfg.Get("vid").ToString("X4");
+    public string PidText => Cfg.Get("pid").ToString("X4");
+    public string ModeText => VidText == "054C" && PidText == "05C4" ? "DualShock 4 (DS4)" : "Custom device";
+
+    // ---- Calibration ----
+    public bool UseCustomCalibration { get => Cfg.Get("calib_mode") == 1; set => Cfg.Set("calib_mode", value ? 1 : 0); }
+}

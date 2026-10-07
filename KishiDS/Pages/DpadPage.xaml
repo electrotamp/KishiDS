@@ -1,0 +1,33 @@
+<UserControl x:Class="KishiDS.Pages.DpadPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:KishiDS.Controls"
+             xmlns:core="clr-namespace:KishiDS.Core">
+    <ScrollViewer>
+        <Grid Margin="0,0,14,60">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="760"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <StackPanel>
+            <TextBlock Text="D-pad" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="Decide what the four D-pad buttons do." Style="{StaticResource Caption}" Margin="0,4,0,0"/>
+
+            <Border Style="{StaticResource Card}" Margin="0,22,0,0">
+                <StackPanel>
+                    <TextBlock Text="D-pad acts as" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Text="Use it as a normal D-pad, or have it drive one of the sticks (handy for games that only read sticks)." Style="{StaticResource Caption}" Margin="0,3,0,14"/>
+                    <ListBox Style="{StaticResource Segmented}" ItemsSource="{x:Static core:ConfigLayout.DpadModes}" SelectedIndex="{Binding S.DpadMode, Mode=TwoWay}"/>
+                </StackPanel>
+            </Border>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Opposite directions together" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Text="What happens when Up and Down (or Left and Right) are pressed at the same time." Style="{StaticResource Caption}" Margin="0,3,0,14"/>
+                    <ListBox Style="{StaticResource Segmented}" ItemsSource="{x:Static core:ConfigLayout.SocdModes}" SelectedIndex="{Binding S.SocdMode, Mode=TwoWay}"/>
+                    <TextBlock Style="{StaticResource Caption}" Margin="2,12,0,0"
+                               Text="Neutral cancels both so nothing moves. Up/Right wins keeps Up over Down and Right over Left, which some fighting-game setups prefer."/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

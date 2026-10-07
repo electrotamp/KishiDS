@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net9.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <AssemblyName>KishiDS</AssemblyName>
+    <RootNamespace>KishiDS</RootNamespace>
+    <Version>1.0.0</Version>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Small single-file exe; needs the .NET 9 Desktop Runtime (already installed). -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>false</SelfContained>
+    <EnableCompressionInSingleFile>false</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+    <Authors>KishiDS</Authors>
+    <ApplicationIcon>Assets\kishi.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Using Include="System.IO" />
+    <Using Include="System.Linq" />
+    <Using Include="System.Threading.Tasks" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Assets\logo.png" />
+    <Resource Include="Assets\kishi.ico" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- The firmware image (built by firmware-research/ds4-firmware/build.sh) and dfu-util are embedded, so the exe is self-contained. -->
+    <EmbeddedResource Include="..\firmware-research\ds4-firmware\kishi_ds4.bin" LogicalName="kishi_ds4.bin" />
+    <EmbeddedResource Include="..\firmware-research\tools\dfu-util\dfu-util-static.exe" LogicalName="dfu-util.exe" />
+  </ItemGroup>
+
+</Project>

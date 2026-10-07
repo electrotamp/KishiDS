@@ -1,0 +1,47 @@
+<UserControl x:Class="KishiDS.Pages.TriggersPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:KishiDS.Controls">
+    <ScrollViewer>
+        <Grid Margin="0,0,14,60">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="1040"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <StackPanel>
+            <TextBlock Text="Triggers" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="Squeeze a trigger to see it move. The yellow marker is where it counts as a click." Style="{StaticResource Caption}" Margin="0,4,0,0"/>
+
+            <Border Style="{StaticResource Card}" Margin="0,22,0,0" Padding="26,22">
+                <StackPanel>
+                    <c:TriggerBar Height="34" Label="L2" Value="{Binding Live.L2}" Threshold="{Binding S.TrigThresh}" Margin="0,0,0,12"/>
+                    <c:TriggerBar Height="34" Label="R2" Value="{Binding Live.R2}" Threshold="{Binding S.TrigThresh}"/>
+                </StackPanel>
+            </Border>
+
+            <UniformGrid Columns="2" Margin="0,16,0,0">
+                <Border Style="{StaticResource Card}" Margin="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="Left trigger" Style="{StaticResource SectionTitle}" Margin="0,0,0,16"/>
+                        <c:SliderRow Label="Dead travel at the top" Unit="%" Minimum="0" Maximum="50" Value="{Binding S.L2Dead, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="Ignore the first part of the pull."/>
+                        <c:SliderRow Label="Full-press point" Unit="%" Minimum="50" Maximum="100" Value="{Binding S.L2Outer, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="Reach 100% before the trigger bottoms out."/>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource Card}" Margin="10,0,0,0">
+                    <StackPanel>
+                        <TextBlock Text="Right trigger" Style="{StaticResource SectionTitle}" Margin="0,0,0,16"/>
+                        <c:SliderRow Label="Dead travel at the top" Unit="%" Minimum="0" Maximum="50" Value="{Binding S.R2Dead, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="Ignore the first part of the pull."/>
+                        <c:SliderRow Label="Full-press point" Unit="%" Minimum="50" Maximum="100" Value="{Binding S.R2Outer, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="Reach 100% before the trigger bottoms out."/>
+                    </StackPanel>
+                </Border>
+            </UniformGrid>
+
+            <Border Style="{StaticResource Card}" Margin="0,16,0,0">
+                <StackPanel>
+                    <TextBlock Text="Behaviour" Style="{StaticResource SectionTitle}" Margin="0,0,0,16"/>
+                    <c:SliderRow Label="Click threshold" Unit="" Minimum="0" Maximum="255" Value="{Binding S.TrigThresh, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="How far a trigger must be pulled before it also counts as a button press (0–255)."/>
+                    <c:ToggleRow Label="Digital triggers" Hint="Report each trigger as fully released or fully pressed, with no analogue range." IsOn="{Binding S.DigitalTriggers, Mode=TwoWay}"/>
+                    <c:ToggleRow Label="Swap triggers" Hint="The left trigger acts as the right one and the other way round." IsOn="{Binding S.SwapTriggers, Mode=TwoWay}"/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

@@ -1,0 +1,198 @@
+<UserControl x:Class="KishiDS.Controls.SetupGuide"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <UserControl.Resources>
+        <Style x:Key="NumBadge" TargetType="Border">
+            <Setter Property="Width" Value="26"/>
+            <Setter Property="Height" Value="26"/>
+            <Setter Property="CornerRadius" Value="13"/>
+            <Setter Property="Background" Value="{StaticResource AccentSoftBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Top"/>
+            <Setter Property="Margin" Value="0,1,14,0"/>
+        </Style>
+        <Style x:Key="NumText" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontSize" Value="12.5"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{StaticResource AccentHiBrush}"/>
+        </Style>
+        <Style x:Key="Body" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
+            <Setter Property="LineHeight" Value="20"/>
+        </Style>
+        <Style x:Key="BodyDim" TargetType="TextBlock" BasedOn="{StaticResource Body}">
+            <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <!-- Scrim -->
+    <Grid x:Name="Scrim" Background="#9908090E">
+        <Border Width="840" Height="660" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="24"
+                Background="{StaticResource CardBrush}" BorderBrush="{StaticResource StrokeHiBrush}" BorderThickness="1">
+            <Border.Effect><DropShadowEffect BlurRadius="50" ShadowDepth="10" Opacity="0.45" Direction="270"/></Border.Effect>
+            <Grid Margin="40,30,40,28">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Progress -->
+                <Grid Grid.Row="0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                        <Border x:Name="Dot1" Style="{StaticResource NumBadge}" Margin="0,0,10,0" VerticalAlignment="Center"><TextBlock x:Name="DotText1" Text="1" Style="{StaticResource NumText}"/></Border>
+                        <TextBlock x:Name="DotLabel1" Text="Welcome" VerticalAlignment="Center" FontSize="13"/>
+                        <Border Width="34" Height="2" Background="{StaticResource StrokeBrush}" Margin="14,0" VerticalAlignment="Center"/>
+                        <Border x:Name="Dot2" Style="{StaticResource NumBadge}" Margin="0,0,10,0" VerticalAlignment="Center"><TextBlock x:Name="DotText2" Text="2" Style="{StaticResource NumText}"/></Border>
+                        <TextBlock x:Name="DotLabel2" Text="Original firmware" VerticalAlignment="Center" FontSize="13"/>
+                        <Border Width="34" Height="2" Background="{StaticResource StrokeBrush}" Margin="14,0" VerticalAlignment="Center"/>
+                        <Border x:Name="Dot3" Style="{StaticResource NumBadge}" Margin="0,0,10,0" VerticalAlignment="Center"><TextBlock x:Name="DotText3" Text="3" Style="{StaticResource NumText}"/></Border>
+                        <TextBlock x:Name="DotLabel3" Text="Switch controller" VerticalAlignment="Center" FontSize="13"/>
+                    </StackPanel>
+                    <Button x:Name="CloseButton" Style="{StaticResource GhostButton}" Content="Close" HorizontalAlignment="Right" Click="Close_Click" Padding="12,6"/>
+                </Grid>
+
+                <!-- ================= Step 1: welcome ================= -->
+                <StackPanel x:Name="Step1" Grid.Row="1" Margin="0,26,0,0">
+                    <Image Source="/Assets/logo.png" Width="72" Height="72" HorizontalAlignment="Left" Margin="-6,0,0,0" RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <TextBlock Text="Welcome to KishiDS" FontFamily="{StaticResource DisplayFont}" FontSize="30" FontWeight="SemiBold" Margin="0,18,0,0"/>
+                    <TextBlock Style="{StaticResource BodyDim}" Margin="0,8,0,0"
+                               Text="KishiDS swaps your Razer Kishi V1's firmware so it shows up as a wired DualShock 4, then lets you remap buttons, tune the sticks and triggers and change the light, live over USB."/>
+
+                    <Border Style="{StaticResource Card}" Background="{StaticResource PanelInsetBrush}" Padding="22,18" Margin="0,24,0,0" CornerRadius="16">
+                        <StackPanel>
+                            <TextBlock Text="This takes about five minutes" FontWeight="SemiBold" Margin="0,0,0,14"/>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="1" Style="{StaticResource NumText}"/></Border>
+                                <StackPanel Grid.Column="1"><TextBlock Text="Save Razer's original firmware" FontWeight="SemiBold"/><TextBlock Style="{StaticResource BodyDim}" Text="So you can always put the controller back exactly as it came."/></StackPanel>
+                            </Grid>
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="2" Style="{StaticResource NumText}"/></Border>
+                                <StackPanel Grid.Column="1"><TextBlock Text="Switch the controller over" FontWeight="SemiBold"/><TextBlock Style="{StaticResource BodyDim}" Text="Hold three buttons while plugging it in, then press Flash now."/></StackPanel>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="3" Style="{StaticResource NumText}"/></Border>
+                                <StackPanel Grid.Column="1"><TextBlock Text="Make it yours" FontWeight="SemiBold"/><TextBlock Style="{StaticResource BodyDim}" Text="Every change applies instantly while the controller is plugged in."/></StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                        <Ellipse x:Name="WelcomeDot" Width="10" Height="10" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="WelcomeStatus" Margin="10,0,0,0" Style="{StaticResource BodyDim}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- ================= Step 2: original firmware ================= -->
+                <StackPanel x:Name="Step2" Grid.Row="1" Margin="0,22,0,0" Visibility="Collapsed">
+                    <TextBlock Text="Save Razer's original firmware first" FontFamily="{StaticResource DisplayFont}" FontSize="26" FontWeight="SemiBold"/>
+                    <TextBlock Style="{StaticResource BodyDim}" Margin="0,6,0,0"
+                               Text="Switching the controller replaces Razer's firmware, and it can't be read back from the controller afterwards. Razer's own Android app contains a copy, so all you need is that app's file. KishiDS checks it and keeps it, ready for Restore."/>
+
+                    <Border Background="{StaticResource PanelInsetBrush}" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1" CornerRadius="16" Padding="22,16" Margin="0,16,0,0">
+                        <StackPanel>
+                            <Grid Margin="0,0,0,11">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="1" Style="{StaticResource NumText}"/></Border>
+                                <TextBlock Grid.Column="1" Style="{StaticResource Body}" VerticalAlignment="Center"><Run Text="Search Google for "/><Run Text="Razer Kishi apk" FontWeight="SemiBold"/><Run Text=" (the original Razer Kishi app for Android, made by Razer Inc.)."/></TextBlock>
+                                <Button Grid.Column="2" Style="{StaticResource SecondaryButton}" Content="Search on Google" Click="Google_Click" Padding="14,7" Margin="12,0,0,0" VerticalAlignment="Center"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,11">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="2" Style="{StaticResource NumText}"/></Border>
+                                <TextBlock Grid.Column="1" Style="{StaticResource Body}" Text="Open a download page you trust, such as Razer's own support pages or APKMirror (it lists Razer Inc. as the developer). Avoid sites that want you to install a &quot;downloader&quot; or &quot;installer&quot;."/>
+                            </Grid>
+                            <Grid Margin="0,0,0,11">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="3" Style="{StaticResource NumText}"/></Border>
+                                <TextBlock Grid.Column="1" Style="{StaticResource Body}" Text="Download version 1.0.34 or 1.0.66 (both are known to contain it). It's a normal .apk file of roughly 16 to 32 MB. Don't try to install it, KishiDS only needs to read it."/>
+                            </Grid>
+                            <Grid>
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="4" Style="{StaticResource NumText}"/></Border>
+                                <TextBlock Grid.Column="1" Style="{StaticResource Body}" Text="Save it to Downloads and KishiDS will spot it, or drag the file onto this window. A .bin of the original firmware works too."/>
+                            </Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Result of the search / drop -->
+                    <Border x:Name="StockOk" Visibility="Collapsed" Margin="0,14,0,0" CornerRadius="14" Padding="18,14" Background="{StaticResource GoodSoftBrush}">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Style="{StaticResource Icon}" Text="&#xE73E;" FontSize="18" Foreground="{StaticResource GoodBrush}" VerticalAlignment="Center"/>
+                            <StackPanel Margin="14,0,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="Original firmware saved" FontWeight="SemiBold"/>
+                                <TextBlock Text="Verified as Razer's official Kishi v2.70. You can restore it any time from the Firmware page." Style="{StaticResource BodyDim}" FontSize="13"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </Border>
+                    <Border x:Name="StockFound" Visibility="Collapsed" Margin="0,14,0,0" CornerRadius="14" Padding="18,12" Background="{StaticResource AccentSoftBrush}">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock x:Name="FoundName" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
+                                <TextBlock x:Name="FoundDetail" Style="{StaticResource BodyDim}" FontSize="13"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Style="{StaticResource GradientButton}" Content="Use this file" Click="UseFound_Click" Padding="18,9" Margin="14,0,0,0"/>
+                        </Grid>
+                    </Border>
+                    <Border x:Name="StockWaiting" Margin="0,14,0,0" CornerRadius="14" Padding="18,12" BorderThickness="1" BorderBrush="{StaticResource StrokeHiBrush}" Background="Transparent">
+                        <Grid>
+                            <Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel VerticalAlignment="Center">
+                                <TextBlock Text="Drop the .apk or .bin here" FontWeight="SemiBold"/>
+                                <TextBlock x:Name="WaitingDetail" Text="Looking in Downloads, Desktop and Documents..." Style="{StaticResource BodyDim}" FontSize="13"/>
+                            </StackPanel>
+                            <Button Grid.Column="1" Style="{StaticResource SecondaryButton}" Content="Browse..." Click="Browse_Click" Padding="18,9" Margin="14,0,0,0"/>
+                        </Grid>
+                    </Border>
+                </StackPanel>
+
+                <!-- ================= Step 3: switch ================= -->
+                <StackPanel x:Name="Step3" Grid.Row="1" Margin="0,22,0,0" Visibility="Collapsed">
+                    <TextBlock x:Name="Step3Title" Text="Switch your controller" FontFamily="{StaticResource DisplayFont}" FontSize="26" FontWeight="SemiBold"/>
+                    <TextBlock x:Name="Step3Intro" Style="{StaticResource BodyDim}" Margin="0,6,0,0"
+                               Text="KishiDS puts the controller into its update mode, writes the new firmware and checks it came back correctly. The controller can always be returned to update mode with the button combination below, even if something goes wrong."/>
+
+                    <Border x:Name="Step3Steps" Background="{StaticResource PanelInsetBrush}" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1" CornerRadius="16" Padding="22,16" Margin="0,18,0,0">
+                        <StackPanel>
+                            <TextBlock Text="When you press the button below, do this:" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="1" Style="{StaticResource NumText}"/></Border><TextBlock Grid.Column="1" Style="{StaticResource Body}" Text="Unplug the Kishi from the computer."/></Grid>
+                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="2" Style="{StaticResource NumText}"/></Border><TextBlock Grid.Column="1" Style="{StaticResource Body}" Text="Press and hold Y + B + the Right Function button."/></Grid>
+                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="3" Style="{StaticResource NumText}"/></Border><TextBlock Grid.Column="1" Style="{StaticResource Body}" Text="Plug it back in while still holding them."/></Grid>
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="40"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><Border Style="{StaticResource NumBadge}" Margin="0"><TextBlock Text="4" Style="{StaticResource NumText}"/></Border><TextBlock Grid.Column="1" Style="{StaticResource Body}" Text="Let go when the Firmware page says the bootloader is detected, then press Flash now."/></Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <Border x:Name="Step3Tips" Visibility="Collapsed" Background="{StaticResource PanelInsetBrush}" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1" CornerRadius="16" Padding="22,16" Margin="0,18,0,0">
+                        <StackPanel>
+                            <TextBlock Text="Where to go next" FontWeight="SemiBold" Margin="0,0,0,12"/>
+                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><TextBlock Text="Overview" FontWeight="SemiBold"/><TextBlock Grid.Column="1" Style="{StaticResource BodyDim}" Text="See the controller react as you press buttons and move the sticks."/></Grid>
+                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><TextBlock Text="Buttons, Sticks, Triggers" FontWeight="SemiBold" TextWrapping="Wrap"/><TextBlock Grid.Column="1" Style="{StaticResource BodyDim}" Text="Remap, tune the response and deadzones. Changes apply instantly."/></Grid>
+                            <Grid Margin="0,0,0,10"><Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><TextBlock Text="Lighting" FontWeight="SemiBold"/><TextBlock Grid.Column="1" Style="{StaticResource BodyDim}" Text="Choose how the blue status light behaves."/></Grid>
+                            <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="150"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions><TextBlock Text="Firmware" FontWeight="SemiBold"/><TextBlock Grid.Column="1" Style="{StaticResource BodyDim}" Text="Restore Razer's original firmware, or reopen this guide."/></Grid>
+                        </StackPanel>
+                    </Border>
+
+                    <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                        <Ellipse x:Name="Step3Dot" Width="10" Height="10" VerticalAlignment="Center"/>
+                        <TextBlock x:Name="Step3Status" Margin="10,0,0,0" Style="{StaticResource BodyDim}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Footer -->
+                <Grid Grid.Row="2" Margin="0,18,0,0">
+                    <Button x:Name="BackButton" Style="{StaticResource SecondaryButton}" Content="Back" HorizontalAlignment="Left" Click="Back_Click" Padding="22,10"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                        <Button x:Name="SkipButton" Style="{StaticResource GhostButton}" Content="Skip for now" Click="Skip_Click" Margin="0,0,10,0" Padding="14,10"/>
+                        <Button x:Name="NextButton" Style="{StaticResource GradientButton}" Content="Get started" Click="Next_Click" Padding="26,11"/>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

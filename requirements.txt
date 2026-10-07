@@ -1,0 +1,6 @@
+# Optional Python tooling (firmware-research/tools, ds4-firmware/tests, KishiDS/tools). Python 3.12 on Windows.
+hidapi          # diag_read.py, diag_log.py, capture_kishi_reports.py (talk to the controller)
+unicorn         # ds4-firmware/tests/emu_test.py (runs the ARM image in an emulator)
+capstone        # tools/disasm_stock.py
+Pillow          # KishiDS/tools/make_logo.py
+numpy           # KishiDS/tools/make_logo.py

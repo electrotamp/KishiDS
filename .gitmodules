@@ -1,0 +1,3 @@
+[submodule "firmware-research/third_party/libopencm3"]
+	path = firmware-research/third_party/libopencm3
+	url = https://github.com/libopencm3/libopencm3.git

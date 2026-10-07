@@ -1,0 +1,121 @@
+<Window x:Class="KishiDS.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:c="clr-namespace:KishiDS.Controls"
+        Title="KishiDS" Icon="/Assets/kishi.ico" Width="1240" Height="804" MinWidth="930" MinHeight="603"
+        WindowStartupLocation="CenterScreen" WindowStyle="None" ResizeMode="CanResize"
+        Background="{StaticResource BgBrush}" FontFamily="{StaticResource UiFont}" UseLayoutRounding="True" SnapsToDevicePixels="True"
+        AllowDrop="True" DragOver="Window_DragOver" Drop="Window_Drop">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome CaptionHeight="56" ResizeBorderThickness="6" GlassFrameThickness="0" CornerRadius="0" UseAeroCaptionButtons="False"/>
+    </WindowChrome.WindowChrome>
+
+    <!-- The whole UI is laid out on a fixed 1240 x 804 stage and scaled uniformly, so the window keeps its aspect ratio
+         (enforced in MainWindow.xaml.cs) and everything stays in proportion at any size. -->
+    <Viewbox Stretch="Uniform">
+        <Grid x:Name="Stage" Width="1240" Height="804" ClipToBounds="True" Background="{StaticResource StageBrush}">
+
+            <!-- Backdrop glow -->
+            <Canvas IsHitTestVisible="False">
+                <Ellipse Canvas.Left="520" Canvas.Top="-380" Width="1100" Height="760">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="{StaticResource GlowBlueColor}" Offset="0"/>
+                            <GradientStop Color="{StaticResource GlowBlueOffColor}" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+                <Ellipse Canvas.Left="120" Canvas.Top="520" Width="900" Height="560">
+                    <Ellipse.Fill>
+                        <RadialGradientBrush>
+                            <GradientStop Color="{StaticResource GlowVioletColor}" Offset="0"/>
+                            <GradientStop Color="{StaticResource GlowVioletOffColor}" Offset="1"/>
+                        </RadialGradientBrush>
+                    </Ellipse.Fill>
+                </Ellipse>
+            </Canvas>
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="240"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- ================= Navigation rail ================= -->
+                <Border Grid.Column="0" Background="{StaticResource SidebarBrush}" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="0,0,1,0">
+                    <DockPanel Margin="16,0,16,18">
+                        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Height="86" Margin="4,0,0,4">
+                            <Image Source="/Assets/logo.png" Width="56" Height="56" Margin="-5,0,0,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality"/>
+                            <StackPanel Margin="8,0,0,0" VerticalAlignment="Center">
+                                <TextBlock FontFamily="{StaticResource DisplayFont}" FontSize="19" FontWeight="SemiBold">
+                                    <Run Text="KISHI"/><Run Text="DS" Foreground="{StaticResource BrandBrush}"/>
+                                </TextBlock>
+                                <TextBlock Text="Controller Firmware" Style="{StaticResource Caption}" FontSize="12.5" Margin="0,1,0,0"/>
+                            </StackPanel>
+                        </StackPanel>
+
+                        <!-- Device mini card -->
+                        <Border DockPanel.Dock="Bottom" Style="{StaticResource Card}" Padding="16,14" CornerRadius="16" Background="{StaticResource MiniCardBrush}" BorderBrush="{StaticResource MiniCardStroke}">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Ellipse Width="11" Height="11" Fill="{Binding Device, Converter={StaticResource StateBrush}}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding DeviceTitle}" Margin="10,0,0,0" FontWeight="SemiBold" FontSize="14"/>
+                                </StackPanel>
+                                <TextBlock Text="{Binding DeviceDetail, Converter={StaticResource SentenceLines}}" Style="{StaticResource Caption}" Margin="0,7,0,0" FontSize="12.5"/>
+                            </StackPanel>
+                        </Border>
+
+                        <StackPanel x:Name="NavPanel">
+                            <RadioButton x:Name="NavOverview" Style="{StaticResource NavItem}" Tag="&#xE80F;" Content="Overview" IsChecked="True" Click="Nav_Click"/>
+                            <TextBlock Text="CONFIGURE" Style="{StaticResource Eyebrow}" Margin="14,20,0,8"/>
+                            <RadioButton Style="{StaticResource NavItem}" Tag="&#xE765;" Content="Buttons" Click="Nav_Click" x:Name="NavButtons"/>
+                            <RadioButton Style="{StaticResource NavItem}" Tag="&#xEA3A;" Content="Sticks" Click="Nav_Click" x:Name="NavSticks"/>
+                            <RadioButton Style="{StaticResource NavItem}" Tag="&#xEC48;" Content="Triggers" Click="Nav_Click" x:Name="NavTriggers"/>
+                            <RadioButton Style="{StaticResource NavItem}" Tag="&#xF0E2;" Content="D-pad" Click="Nav_Click" x:Name="NavDpad"/>
+                            <RadioButton Style="{StaticResource NavItem}" Tag="&#xE706;" Content="Lighting" Click="Nav_Click" x:Name="NavLighting"/>
+                            <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="6,16,6,0"/>
+                            <TextBlock Text="DEVICE" Style="{StaticResource Eyebrow}" Margin="14,16,0,8"/>
+                            <RadioButton Style="{StaticResource NavItem}" Tag="&#xE9D9;" Content="Calibration" Click="Nav_Click" x:Name="NavCalibration"/>
+                            <RadioButton Style="{StaticResource NavItem}" Tag="&#xEF58;" Content="Identity" Click="Nav_Click" x:Name="NavIdentity"/>
+                            <RadioButton Style="{StaticResource NavItem}" Tag="&#xE896;" Content="Firmware" Click="Nav_Click" x:Name="NavFirmware"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- ================= Main area ================= -->
+                <Grid Grid.Column="1">
+                    <!-- Page host (each page draws its own title) -->
+                    <ContentControl x:Name="Host" Margin="32,76,18,0" IsTabStop="False">
+                        <ContentControl.RenderTransform><TranslateTransform x:Name="HostShift"/></ContentControl.RenderTransform>
+                    </ContentControl>
+
+                    <!-- First-run / help walkthrough -->
+                    <c:SetupGuide x:Name="Setup" Visibility="Collapsed"/>
+
+                    <!-- Window buttons (top right) -->
+                    <StackPanel HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,14,14,0" Orientation="Horizontal" WindowChrome.IsHitTestVisibleInChrome="True">
+                        <Button x:Name="ThemeButton" Style="{StaticResource WindowButton}" Click="Theme_Click"><TextBlock x:Name="ThemeIcon" Style="{StaticResource Icon}" Text="&#xE706;" FontSize="13"/></Button>
+                        <Button Style="{StaticResource WindowButton}" Click="Min_Click"><TextBlock Style="{StaticResource Icon}" Text="&#xE921;" FontSize="10"/></Button>
+                        <Button Style="{StaticResource WindowButton}" Click="Max_Click"><TextBlock Style="{StaticResource Icon}" Text="&#xE922;" FontSize="10"/></Button>
+                        <Button Style="{StaticResource WindowButton}" Click="Close_Click"><TextBlock Style="{StaticResource Icon}" Text="&#xE8BB;" FontSize="10"/></Button>
+                    </StackPanel>
+
+                    <!-- Floating apply bar -->
+                    <Border x:Name="ApplyBar" HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,26" Padding="22,12,12,12" CornerRadius="18"
+                            Background="{StaticResource FlyBrush}" BorderBrush="{StaticResource StrokeHiBrush}" BorderThickness="1" Opacity="0" IsHitTestVisible="False" RenderTransformOrigin="0.5,0.5">
+                        <Border.RenderTransform><TranslateTransform x:Name="BarShift" Y="24"/></Border.RenderTransform>
+                        <Border.Effect><DropShadowEffect BlurRadius="30" ShadowDepth="6" Opacity="0.55" Direction="270"/></Border.Effect>
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" Fill="{StaticResource WarnBrush}" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding BarMessage}" Margin="10,0,22,0" VerticalAlignment="Center"/>
+                            <Button Style="{StaticResource GhostButton}" Content="{Binding BarSecondaryText}" Command="{Binding BarSecondaryCommand}" Margin="0,0,6,0"
+                                    Visibility="{Binding HasBarSecondary, Converter={StaticResource B2V}}"/>
+                            <Button Style="{StaticResource PrimaryButton}" Content="{Binding BarPrimaryText}" Command="{Binding BarPrimaryCommand}" Padding="20,9"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Viewbox>
+</Window>

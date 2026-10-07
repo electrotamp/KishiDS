@@ -1,0 +1,172 @@
+<UserControl x:Class="KishiDS.Pages.OverviewPage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:KishiDS.Controls">
+    <UserControl.Resources>
+        <Style x:Key="KvLabel" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+        </Style>
+        <Style x:Key="KvValue" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontSize" Value="13.5"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+        <Style x:Key="TileValue" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
+            <Setter Property="FontFamily" Value="{StaticResource DisplayFont}"/>
+            <Setter Property="FontSize" Value="22"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+            <Setter Property="Margin" Value="0,3,0,0"/>
+        </Style>
+        <Style x:Key="TileCaption" TargetType="TextBlock" BasedOn="{StaticResource Caption}">
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="TextWrapping" Value="NoWrap"/>
+            <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+        </Style>
+        <Style x:Key="TileChevron" TargetType="TextBlock" BasedOn="{StaticResource Icon}">
+            <Setter Property="Text" Value="&#xE76C;"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Foreground" Value="{StaticResource TextDimBrush}"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="4,0,0,0"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="0,0,14,34">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0">
+            <TextBlock Text="Overview" Style="{StaticResource PageTitle}" FontSize="34"/>
+            <TextBlock Text="A live view of your Kishi. Press buttons and move the sticks to see them respond." Style="{StaticResource Caption}" FontSize="14.5" Margin="0,2,0,0"/>
+        </StackPanel>
+
+        <!-- Hero -->
+        <Border Grid.Row="1" Style="{StaticResource Card}" Margin="0,20,0,16" Padding="32,20,20,20" CornerRadius="20" BorderBrush="{StaticResource StrokeBrush}">
+            <Border.Background><StaticResource ResourceKey="HeroBrush"/></Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="268"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" VerticalAlignment="Center"><StackPanel>
+                    <Border Width="44" Height="44" CornerRadius="12" Background="{StaticResource IconTileBgBrush}" BorderBrush="{StaticResource IconTileStrokeBrush}" BorderThickness="1" HorizontalAlignment="Left">
+                        <TextBlock Style="{StaticResource Icon}" Text="&#xE71B;" Foreground="{StaticResource IconTileFgBrush}" FontSize="21" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <TextBlock Text="{Binding DeviceTitle}" FontSize="26" FontWeight="SemiBold" FontFamily="{StaticResource DisplayFont}" Margin="0,10,0,0"/>
+                    <TextBlock Text="{Binding DeviceDetail, Converter={StaticResource SentenceLines}}" Style="{StaticResource Caption}" FontSize="14" Margin="0,5,0,0"/>
+
+                    <Button Style="{StaticResource GradientButton}" Content="Apply to controller" Command="{Binding ApplyCommand}" HorizontalAlignment="Left" Margin="0,10,0,0"
+                            Visibility="{Binding ShowApplyButton, Converter={StaticResource B2V}}"/>
+
+                    <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="0,12,0,8"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions><ColumnDefinition Width="100"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions><RowDefinition Height="26"/><RowDefinition Height="26"/><RowDefinition Height="26"/><RowDefinition Height="26"/></Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Device:" Style="{StaticResource KvLabel}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding S.Product}" Style="{StaticResource KvValue}"/>
+                        <TextBlock Grid.Row="1" Text="Product ID:" Style="{StaticResource KvLabel}"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Style="{StaticResource KvValue}"><Run Text="{Binding S.VidText, Mode=OneWay}"/><Run Text=" : "/><Run Text="{Binding S.PidText, Mode=OneWay}"/></TextBlock>
+                        <TextBlock Grid.Row="2" Text="Mode:" Style="{StaticResource KvLabel}"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding S.ModeText, Mode=OneWay}" Style="{StaticResource KvValue}"/>
+                        <TextBlock Grid.Row="3" Text="Serial:" Style="{StaticResource KvLabel}"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Serial, Mode=OneWay, TargetNullValue=—}" Style="{StaticResource KvValue}"/>
+                    </Grid>
+                </StackPanel></ScrollViewer>
+                <c:ControllerView Grid.Column="1" Margin="12,0,0,0" Input="{Binding Live}" ButtonMask="{Binding Tele.ButtonMask, FallbackValue=0}"
+                                  Connected="{Binding IsConnected}" LedMode="{Binding S.LedMode, Mode=OneWay}"/>
+            </Grid>
+        </Border>
+
+        <!-- Summary tiles -->
+        <UniformGrid Grid.Row="2" Columns="4" Height="108" Margin="0,0,0,16">
+            <Button Style="{StaticResource TileButton}" Tag="Buttons" Click="Go_Click" Margin="0,0,7,0" BorderBrush="{StaticResource Tile1Stroke}" Background="{StaticResource Tile1Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Style="{StaticResource Icon}" Text="&#xE7FC;" FontSize="31" Foreground="{StaticResource Tile1IconBrush}" VerticalAlignment="Top" Margin="0,5,12,0"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="BUTTONS" Style="{StaticResource Eyebrow}" Foreground="{StaticResource Tile1EyebrowBrush}"/>
+                        <TextBlock Text="{Binding S.RemappedCount}" Style="{StaticResource TileValue}"/>
+                        <TextBlock Text="remapped from default" Style="{StaticResource TileCaption}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Style="{StaticResource TileChevron}"/>
+                </Grid>
+            </Button>
+            <Button Style="{StaticResource TileButton}" Tag="Calibration" Click="Go_Click" Margin="7,0,7,0" BorderBrush="{StaticResource Tile2Stroke}" Background="{StaticResource Tile2Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <Viewbox Width="34" Height="34" VerticalAlignment="Top" Margin="0,4,12,0">
+                        <Canvas Width="24" Height="24"><Path Data="M2,12 H7 L10,5 L14,19 L17,12 H22" Stroke="{StaticResource Tile2IconBrush}" StrokeThickness="1.7" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/></Canvas>
+                    </Viewbox>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="REPORT RATE" Style="{StaticResource Eyebrow}" Foreground="{StaticResource Tile2EyebrowBrush}"/>
+                        <TextBlock Style="{StaticResource TileValue}"><Run Text="{Binding S.PollHz, Mode=OneWay}"/><Run Text=" Hz" FontSize="19"/></TextBlock>
+                        <TextBlock Text="USB polling" Style="{StaticResource TileCaption}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Style="{StaticResource TileChevron}"/>
+                </Grid>
+            </Button>
+            <Button Style="{StaticResource TileButton}" Tag="Lighting" Click="Go_Click" Margin="7,0,7,0" BorderBrush="{StaticResource Tile3Stroke}" Background="{StaticResource Tile3Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Style="{StaticResource Icon}" Text="&#xE706;" FontSize="31" Foreground="{StaticResource Tile3IconBrush}" VerticalAlignment="Top" Margin="0,5,12,0"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="LIGHTING" Style="{StaticResource Eyebrow}" Foreground="{StaticResource Tile3EyebrowBrush}"/>
+                        <TextBlock Text="{Binding S.LedModeName}" Style="{StaticResource TileValue}"/>
+                        <TextBlock Text="blue status LED" Style="{StaticResource TileCaption}"/>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Style="{StaticResource TileChevron}"/>
+                </Grid>
+            </Button>
+            <Button Style="{StaticResource TileButton}" Tag="Identity" Click="Go_Click" Margin="7,0,0,0" BorderBrush="{StaticResource Tile1Stroke}" Background="{StaticResource Tile1Brush}">
+                <Grid>
+                    <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                    <TextBlock Style="{StaticResource Icon}" Text="&#xEF58;" FontSize="31" Foreground="{StaticResource Tile1IconBrush}" VerticalAlignment="Top" Margin="0,5,12,0"/>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                        <TextBlock Text="APPEARS AS" Style="{StaticResource Eyebrow}" Foreground="{StaticResource Tile1EyebrowBrush}"/>
+                        <TextBlock Text="{Binding S.Product}" Style="{StaticResource TileValue}" FontSize="18" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="54"/>
+                        <TextBlock Style="{StaticResource TileCaption}"><Run Text="{Binding S.VidText, Mode=OneWay}"/><Run Text=" : "/><Run Text="{Binding S.PidText, Mode=OneWay}"/></TextBlock>
+                    </StackPanel>
+                    <TextBlock Grid.Column="2" Style="{StaticResource TileChevron}"/>
+                </Grid>
+            </Button>
+        </UniformGrid>
+
+        <!-- Profiles -->
+        <Border Grid.Row="3" Style="{StaticResource Card}" Height="108" Padding="28,0,24,0" CornerRadius="20" BorderBrush="{StaticResource StrokeBrush}">
+            <Border.Background><StaticResource ResourceKey="HeroBrush"/></Border.Background>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Viewbox Width="46" Height="46" Margin="0,0,22,0">
+                    <Canvas Width="24" Height="24">
+                        <Path Data="M12,3 L2.5,8 L12,13 L21.5,8 Z M2.5,12 L12,17 L21.5,12 M2.5,16 L12,21 L21.5,16" Stroke="{StaticResource TextDimBrush}" StrokeThickness="1.3" StrokeLineJoin="Round" StrokeStartLineCap="Round" StrokeEndLineCap="Round"/>
+                    </Canvas>
+                </Viewbox>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                    <TextBlock Text="Profiles" FontSize="20" FontWeight="SemiBold" FontFamily="{StaticResource DisplayFont}"/>
+                    <TextBlock Text="Save your settings to a file, share them, or load someone else's." Style="{StaticResource Caption}" FontSize="14" Margin="0,3,0,0"/>
+                </StackPanel>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource SecondaryButton}" Click="Load_Click" Margin="0,0,12,0" Padding="20,11">
+                        <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Icon}" Text="&#xE838;" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Load..." Foreground="{StaticResource TextBrush}" FontWeight="SemiBold"/></StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource GradientButton}" Click="Save_Click" Margin="0,0,12,0" Padding="22,11">
+                        <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Icon}" Text="&#xE896;" FontSize="16" Foreground="White" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Save..." Foreground="White" FontWeight="SemiBold"/></StackPanel>
+                    </Button>
+                    <Button Style="{StaticResource GhostButton}" Command="{Binding ResetAllCommand}" Padding="16,11">
+                        <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Icon}" Text="&#xE777;" FontSize="16" Foreground="{StaticResource TextBrush}" Margin="0,0,10,0" VerticalAlignment="Center"/><TextBlock Text="Reset all" Foreground="{StaticResource TextBrush}"/></StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

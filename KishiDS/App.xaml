@@ -1,0 +1,26 @@
+<Application x:Class="KishiDS.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:KishiDS.Controls">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Theme/Palette.Dark.xaml"/>
+                <ResourceDictionary Source="Theme/Theme.xaml"/>
+                <ResourceDictionary Source="Theme/KishiArt.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <c:SplitDot x:Key="SplitDot"/>
+            <c:SentenceLines x:Key="SentenceLines"/>
+            <BooleanToVisibilityConverter x:Key="B2V"/>
+            <c:InverseBoolToVisibility x:Key="InvB2V"/>
+            <c:InverseBool x:Key="InvB"/>
+            <c:DeviceStateToBrush x:Key="StateBrush"/>
+            <c:PercentText x:Key="Pct"/>
+            <c:IntToDouble x:Key="I2D"/>
+            <c:ByteToPercentText x:Key="U8Pct"/>
+            <c:PhaseToStateIndex x:Key="Phase2State"/>
+            <c:PhaseIsSpinning x:Key="PhaseSpin"/>
+            <c:EqualsToVisibility x:Key="EqVis"/>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

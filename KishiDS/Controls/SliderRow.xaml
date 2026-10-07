@@ -1,0 +1,19 @@
+<UserControl x:Class="KishiDS.Controls.SliderRow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="root">
+    <StackPanel Margin="0,0,0,18">
+        <Grid>
+            <TextBlock Text="{Binding Label, ElementName=root}" FontWeight="SemiBold"/>
+            <Border HorizontalAlignment="Right" CornerRadius="8" Background="{StaticResource FieldBrush}" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1" Padding="10,3">
+                <TextBlock FontFamily="{StaticResource MonoFont}" FontSize="12.5">
+                    <Run Text="{Binding Value, ElementName=root, StringFormat={}{0:0}, Mode=OneWay}"/><Run Text="{Binding Unit, ElementName=root}" Foreground="{StaticResource TextDimBrush}"/>
+                </TextBlock>
+            </Border>
+        </Grid>
+        <TextBlock Text="{Binding Hint, ElementName=root}" Style="{StaticResource Caption}" Margin="0,2,0,6" Visibility="{Binding HintVisibility, ElementName=root}"/>
+        <Slider Style="{StaticResource ModernSlider}" Margin="0,4,0,0"
+                Minimum="{Binding Minimum, ElementName=root}" Maximum="{Binding Maximum, ElementName=root}"
+                Value="{Binding Value, ElementName=root, Mode=TwoWay}" SmallChange="1" LargeChange="5" IsSnapToTickEnabled="True" TickFrequency="{Binding Step, ElementName=root}"/>
+    </StackPanel>
+</UserControl>

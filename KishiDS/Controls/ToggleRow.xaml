@@ -1,0 +1,16 @@
+<UserControl x:Class="KishiDS.Controls.ToggleRow"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Name="root">
+    <Grid Margin="0,0,0,16">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="Auto"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel VerticalAlignment="Center" Margin="0,0,24,0">
+            <TextBlock Text="{Binding Label, ElementName=root}" FontWeight="SemiBold"/>
+            <TextBlock Text="{Binding Hint, ElementName=root}" Style="{StaticResource Caption}" Margin="0,2,0,0" Visibility="{Binding HintVisibility, ElementName=root}"/>
+        </StackPanel>
+        <CheckBox Grid.Column="1" Style="{StaticResource ToggleSwitch}" IsChecked="{Binding IsOn, ElementName=root, Mode=TwoWay}" VerticalAlignment="Center"/>
+    </Grid>
+</UserControl>
