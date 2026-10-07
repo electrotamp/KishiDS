@@ -5,7 +5,7 @@
 .DESCRIPTION
   aapt2 (resources + manifest) -> javac (Java 8 language level) -> d8 (dex) -> zipalign -> apksigner.
   The firmware image (firmware-research\ds4-firmware\kishi_ds4.bin) is packaged into the app, so rebuild after every firmware build.
-  Needs JDK 17 and the Android SDK (platform android-34 and build-tools 34): ANDROID_HOME / ANDROID_SDK_ROOT, or E:\Android\Sdk.
+  Needs JDK 17 and the Android SDK (platform android-34 and build-tools 34): ANDROID_HOME / ANDROID_SDK_ROOT, or the default %LOCALAPPDATA%\Android\Sdk.
 
   The first run creates a local signing key in keystore\ (never commit it).  For your own release key pass -Keystore / -KeyAlias / -KeyPass.
 
@@ -31,7 +31,7 @@ function Run([string]$exe, [string[]]$arguments) {
 }
 
 # ---- locate the tools ----
-$sdk = @($env:ANDROID_HOME, $env:ANDROID_SDK_ROOT, "E:\Android\Sdk", "$env:LOCALAPPDATA\Android\Sdk") | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
+$sdk = @($env:ANDROID_HOME, $env:ANDROID_SDK_ROOT, "$env:LOCALAPPDATA\Android\Sdk") | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1
 if (-not $sdk) { Fail "Android SDK not found. Set ANDROID_HOME." }
 $bt = Get-ChildItem "$sdk\build-tools" -Directory | Sort-Object { [version]($_.Name -replace '[^\d\.].*$', '') } -Descending | Select-Object -First 1
 if (-not $bt) { Fail "No build-tools in $sdk\build-tools" }
