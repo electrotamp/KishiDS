@@ -30,6 +30,8 @@ configure it live over USB and flash it, and an Android app that does the same f
 
 ## Use it
 
+**When using a computer, connect the Kishi's USB-C plug (the one that normally goes into your phone) to the computer.**
+
 1. Install the [.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0) (Windows 64-bit; tested on Windows 11).
 2. Get `KishiDS.exe` from the [Releases](../../releases) page (or build it: [docs/BUILDING.md](docs/BUILDING.md)). Check it against the SHA-256 in the release notes.
 3. Run it. A setup guide walks through saving Razer's original firmware (so you can always go back) and switching the controller.
