@@ -40,17 +40,15 @@ After that, every setting changes live while the controller is connected.
 
 ## Android
 
-`KishiDS.apk` (on the [Releases](../../releases) page; Android 7.0+) is the same app for your phone, built for how the Kishi is held: landscape gets a
-side navigation and two-column pages, portrait a bottom bar. It has the same pages and speaks the same protocol, and profiles load in either app.
-It can also flash the controller from the phone (put the Kishi in update mode by hand, as with Razer's own app).
+`KishiDS.apk` (on the [Releases](../../releases) page; Android 7.0+) is the same app on your phone. It works exactly like the Windows one: the same
+settings, live editing, profiles and flashing, and it works in landscape as well as portrait so you can use it while the phone is in the Kishi.
+Profiles are interchangeable between the two.
 
-| Overview | Sticks |
-|---|---|
-| ![Android overview](docs/screenshots/android-overview.png) | ![Android sticks](docs/screenshots/android-sticks.png) |
+![KishiDS on Android](docs/screenshots/android-overview.png)
 
-Install it by allowing installs from your browser or file manager, then opening the file. Android asks once per connection for permission to use the
-controller's USB port. This is an early build: it has been tested in an emulator and with unit tests, and the USB side is still being proven on real
-phones, so please report anything odd. Build and details: [KishiDS-Android/README.md](KishiDS-Android/README.md).
+To install, allow installs from your browser or file manager and open the file. Android asks for permission to use the controller's USB port when it
+connects. This is an early build and the USB side is still being proven on more phones, so please report anything odd. More in
+[KishiDS-Android/README.md](KishiDS-Android/README.md).
 
 ### Getting back to stock
 
