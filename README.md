@@ -1,9 +1,7 @@
-# 📱 **Android APK coming very soon!**
-
 # KishiDS
 
 **Kishi DualShock**: custom firmware that makes the **Razer Kishi V1 (RZ06-0290)** show up as a wired **DualShock 4**, plus a Windows app to
-configure it live over USB and flash it.
+configure it live over USB and flash it, and an Android app that does the same from the phone clamped into the Kishi.
 
 > **Unofficial, use at your own risk.** Not affiliated with, endorsed by, or sponsored by Razer or Sony. "Razer", "Kishi" and "DualShock" are
 > trademarks of their owners, used here only to describe compatibility. The firmware identifies itself with a DualShock 4's USB IDs on purpose so
@@ -40,6 +38,20 @@ configure it live over USB and flash it.
 
 After that, every setting changes live while the controller is connected.
 
+## Android
+
+`KishiDS.apk` (on the [Releases](../../releases) page; Android 7.0+) is the same app for your phone, built for how the Kishi is held: landscape gets a
+side navigation and two-column pages, portrait a bottom bar. It has the same pages and speaks the same protocol, and profiles load in either app.
+It can also flash the controller from the phone (put the Kishi in update mode by hand, as with Razer's own app).
+
+| Overview | Sticks |
+|---|---|
+| ![Android overview](docs/screenshots/android-overview.png) | ![Android sticks](docs/screenshots/android-sticks.png) |
+
+Install it by allowing installs from your browser or file manager, then opening the file. Android asks once per connection for permission to use the
+controller's USB port. This is an early build: it has been tested in an emulator and with unit tests, and the USB side is still being proven on real
+phones, so please report anything odd. Build and details: [KishiDS-Android/README.md](KishiDS-Android/README.md).
+
 ### Getting back to stock
 
 Razer's firmware is **not included** in this repository (it is Razer's copyright). KishiDS can read it from Razer's own Android app
@@ -52,6 +64,7 @@ whatever firmware is installed, so a bad flash of the application can always be 
 | Path | What it is |
 |---|---|
 | `KishiDS/` | The .NET 9 WPF app (no NuGet packages). |
+| `KishiDS-Android/` | The Android app (Java, no libraries, built with the plain SDK tools). |
 | `firmware-research/ds4-firmware/` | The controller firmware (C, libopencm3), host tests, and the prebuilt `kishi_ds4.bin`. |
 | `firmware-research/tools/` | Python helpers. `gen_config.py` is the single source of the settings schema shared by firmware and app. |
 | `firmware-research/*.md` | Reverse-engineering notes: [board and pin map](firmware-research/BOARD_MAP.md), firmware map, input map, DS4 target, feasibility, [bring-up history](firmware-research/BRINGUP_HISTORY.md). |

@@ -3,6 +3,7 @@
 Generates:
   ds4-firmware/config_layout.h                    (C struct, defaults, clamp, static asserts)
   ../KishiDS/Core/ConfigLayout.g.cs           (C# field table, defaults, enums)
+  ../KishiDS-Android/app/src/main/java/com/electrotamp/kishids/core/ConfigLayout.java   (the same table for the Android app)
 
 Run:  python tools/gen_config.py
 The block lives in the firmware image (section .kcfg, found by its magic).  The firmware
@@ -17,6 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 C_OUT = ROOT / "ds4-firmware" / "config_layout.h"
 CS_OUT = ROOT.parent / "KishiDS" / "Core" / "ConfigLayout.g.cs"
+JAVA_OUT = ROOT.parent / "KishiDS-Android" / "app" / "src" / "main" / "java" / "com" / "electrotamp" / "kishids" / "core" / "ConfigLayout.java"
 
 CONFIG_SIZE = 256
 CONFIG_VERSION = 1
@@ -215,13 +217,69 @@ def gen_cs() -> str:
     return "\n".join(o) + "\n"
 
 
+def gen_java() -> str:
+    o = []
+    o.append("// Output of tools/gen_config.py -- do not edit by hand.")
+    o.append("package com.electrotamp.kishids.core;\n")
+    o.append("public final class ConfigLayout {")
+    o.append("    private ConfigLayout() {}\n")
+    o.append(f"    public static final int SIZE = {CONFIG_SIZE};")
+    o.append(f"    public static final int VERSION = {CONFIG_VERSION};")
+    o.append('    public static final String MAGIC = "KISHICFG";')
+    o.append("    public static final int CRC_START = 16;\n")
+    o.append("    public enum Kind { U8, U16, U32, CHAR }\n")
+    o.append("    public static final class FieldDef {")
+    o.append("        public final String name;")
+    o.append("        public final int offset, count;")
+    o.append("        public final Kind kind;")
+    o.append("        public final int[] defaults;")
+    o.append("        public final String defaultText, doc;")
+    o.append("        public final Integer min, max;")
+    o.append("        public final boolean locked;\n")
+    o.append("        FieldDef(String name, int offset, Kind kind, int count, int[] defaults, String defaultText, Integer min, Integer max, String doc, boolean locked) {")
+    o.append("            this.name = name; this.offset = offset; this.kind = kind; this.count = count; this.defaults = defaults;")
+    o.append("            this.defaultText = defaultText; this.min = min; this.max = max; this.doc = doc; this.locked = locked;")
+    o.append("        }\n")
+    o.append("        public int elementSize() { return kind == Kind.U16 ? 2 : kind == Kind.U32 ? 4 : 1; }")
+    o.append("        public int byteSize() { return count * elementSize(); }")
+    o.append("    }\n")
+
+    def arr(name, items):
+        return f"    public static final String[] {name} = {{ " + ", ".join('"%s"' % cs_escape(x) for x in items) + " };"
+
+    o.append(arr("OUTPUTS", OUTPUTS))
+    o.append(arr("KISHI_BUTTONS", KISHI_BUTTONS))
+    o.append(arr("CURVES", CURVES))
+    o.append(arr("DPAD_MODES", DPAD_MODES))
+    o.append(arr("SOCD_MODES", SOCD_MODES))
+    o.append(arr("LED_MODES", LED_MODES))
+    o.append("\n    public static final FieldDef[] FIELDS = {")
+    for f in F:
+        d = f["default"]
+        if f["kind"] == "char":
+            dv, dt = "new int[0]", cs_escape(d)
+        elif f["count"] == 1:
+            dv, dt = "new int[] { %d }" % d, ""
+        else:
+            dv, dt = "new int[] { %s }" % ", ".join(str(x) for x in d), ""
+        lo = "null" if f["lo"] is None else str(f["lo"])
+        hi = "null" if f["hi"] is None else str(f["hi"])
+        o.append(f'        new FieldDef("{f["name"]}", {f["off"]}, Kind.{f["kind"].upper()}, {f["count"]}, {dv}, "{dt}", {lo}, {hi}, '
+                 f'"{cs_escape(f["doc"])}", {"true" if f["locked"] else "false"}),')
+    o.append("    };\n}")
+    return "\n".join(o) + "\n"
+
+
 def main() -> None:
     check()
     C_OUT.write_text(gen_c(), encoding="utf-8", newline="\n")
     CS_OUT.parent.mkdir(parents=True, exist_ok=True)
     CS_OUT.write_text(gen_cs(), encoding="utf-8", newline="\n")
+    JAVA_OUT.parent.mkdir(parents=True, exist_ok=True)
+    JAVA_OUT.write_text(gen_java(), encoding="utf-8", newline="\n")
     print("wrote", C_OUT)
     print("wrote", CS_OUT)
+    print("wrote", JAVA_OUT)
 
 
 if __name__ == "__main__":

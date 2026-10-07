@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="AppTheme" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/launch_bg</item>
+        <item name="android:statusBarColor">@color/launch_bg</item>
+        <item name="android:navigationBarColor">@color/launch_bg</item>
+        <item name="android:colorAccent">#3B82F6</item>
+        <item name="android:textColorHighlight">#663B82F6</item>
+        <item name="android:textColorLink">#5B9AFF</item>
+        <!-- The app draws its own dark and light themes; do not let the system recolour them. -->
+        <item name="android:forceDarkAllowed">false</item>
+    </style>
+</resources>

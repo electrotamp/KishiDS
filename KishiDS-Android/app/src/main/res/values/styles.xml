@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="launch_bg">#080A11</color>
+    <color name="icon_bg">#0B0E17</color>
+    <style name="AppTheme" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/launch_bg</item>
+        <item name="android:statusBarColor">@color/launch_bg</item>
+        <item name="android:navigationBarColor">@color/launch_bg</item>
+        <item name="android:colorAccent">#3B82F6</item>
+        <item name="android:textColorHighlight">#663B82F6</item>
+        <item name="android:textColorLink">#5B9AFF</item>
+    </style>
+</resources>
