@@ -30,7 +30,7 @@ configure it live over USB and flash it, and an Android app that does the same f
 
 ## Use it
 
-**When using a computer, connect the Kishi's USB-C plug (the one that normally goes into your phone) to the computer.** You will likely need a USB-C extender to reach it.
+**When using a computer, connect the Kishi's USB-C plug (the one that normally goes into your phone) to the computer.** The plug is recessed, so it basically won't fit onto a computer's port directly: **you will need a USB-C extender**.
 
 1. Install the [.NET 9 Desktop Runtime](https://dotnet.microsoft.com/download/dotnet/9.0) (Windows 64-bit; tested on Windows 11).
 2. Get `KishiDS.exe` from the [Releases](../../releases) page (or build it: [docs/BUILDING.md](docs/BUILDING.md)). Check it against the SHA-256 in the release notes.
