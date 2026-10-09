@@ -79,6 +79,19 @@ void ds4_set_device_address(const uint8_t addr[6])
 	}
 }
 
+void ds4_address_from_uid(const uint8_t *uid, unsigned len, uint8_t addr[6])
+{
+	unsigned i;
+
+	for (i = 0; i < 6; i++) {
+		addr[i] = 0;
+	}
+	for (i = 0; i < len; i++) {
+		addr[i % 6] ^= uid[i];
+	}
+	addr[5] = (uint8_t)((addr[5] & 0xFC) | 0x02);
+}
+
 uint16_t ds4_fixed_feature(uint8_t report_id, uint8_t scratch[64], const uint8_t **data)
 {
 	unsigned i, j;

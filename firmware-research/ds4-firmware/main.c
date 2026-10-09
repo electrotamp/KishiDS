@@ -337,16 +337,10 @@ static void usb_setup(void)
 		(const uint32_t *)KCFG_UID_ADDR);
 	{
 		/* The DS4 Bluetooth address (features 0x12/0x81) from the chip's 96-bit UID: iOS remembers a DS4 by it and
-		 * takes two controllers with the same one for one (ds4_usb.h).  Folded to 48 bits, unicast, locally
-		 * administered, as the V2 Pro does with its UUID. */
-		const uint8_t *uid = (const uint8_t *)KCFG_UID_ADDR;
+		 * takes two controllers with the same one for one (ds4_usb.h). */
 		uint8_t addr[6];
-		unsigned k;
 
-		for (k = 0; k < 6; k++) {
-			addr[k] = (uint8_t)(uid[k] ^ uid[k + 6]);
-		}
-		addr[5] = (uint8_t)((addr[5] & 0xFC) | 0x02);
+		ds4_address_from_uid((const uint8_t *)KCFG_UID_ADDR, 12, addr);
 		ds4_set_device_address(addr);
 	}
 	usb_strings[0] = usb_string_text[0];

@@ -31,6 +31,12 @@ extern const uint16_t ds4_report_descriptor_len;
  */
 void ds4_set_device_address(const uint8_t addr[6]);
 
+/*
+ * A per-unit address from a chip's unique ID (the V1's 96-bit STM32 UID, the V2 Pro's 128-bit LPC55 UUID): every byte
+ * XORed into addr[i % 6], then made unicast and locally administered (first octet, sent last: bit 0 clear, bit 1 set).
+ */
+void ds4_address_from_uid(const uint8_t *uid, unsigned len, uint8_t addr[6]);
+
 uint16_t ds4_fixed_feature(uint8_t report_id, uint8_t scratch[64], const uint8_t **data);
 
 #endif

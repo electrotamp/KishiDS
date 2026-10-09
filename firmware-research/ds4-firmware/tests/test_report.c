@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "../ds4_usb.h"
 #include "../report.h"
 
 static int checks, failures;
@@ -37,7 +38,7 @@ static struct kishi_cal cal_default(const struct kishi_config *c)
 	return cal;
 }
 
-static void build(const struct kishi_config *c, uint16_t buttons, const uint16_t adc[KISHI_ADC_COUNT], uint8_t out[64])
+static void build(const struct kishi_config *c, uint32_t buttons, const uint16_t adc[KISHI_ADC_COUNT], uint8_t out[64])
 {
 	struct kishi_cal cal = cal_default(c);
 
@@ -238,6 +239,39 @@ static void test_stock_cal_page(void)
 	CHECK(memcmp(&cal, &d, sizeof(cal)) == 0, "config defaults == reference stock calibration");
 }
 
+/* Per-unit DS4 address (ds4_usb.c) and the touchpad packet TouchLeft / TouchRight produce (report.c). */
+static void test_address_and_touch(void)
+{
+	static const uint8_t uid16[16] = {0x5A, 0x74, 0x36, 0x7F, 0xFC, 0x1B, 0x4E, 0x59, 0xA8, 0x49, 0x42, 0x04,
+					  0x54, 0x9F, 0x29, 0x23};
+	/* Read on the V2 Pro whose UUID is uid16: 0x12 answered 40 b2 b7 15 be 1e. */
+	static const uint8_t want16[6] = {0x40, 0xB2, 0xB7, 0x15, 0xBE, 0x1E};
+	uint8_t a[6], out[64];
+	uint16_t adc[KISHI_ADC_COUNT] = {2048, 2048, 2048, 2048, 2048, 2048};
+	struct kishi_config c = cfg_default();
+	unsigned i;
+
+	ds4_address_from_uid(uid16, 16, a);
+	CHECK(memcmp(a, want16, 6) == 0, "address from a 128-bit UUID matches the one read on hardware");
+	ds4_address_from_uid(uid16, 12, a);
+	for (i = 0; i < 6; i++) {
+		uint8_t w = (uint8_t)(uid16[i] ^ uid16[i + 6]);
+
+		if (i == 5) w = (uint8_t)((w & 0xFC) | 0x02);
+		EXPECT_EQ(a[i], w, "address from a 96-bit UID");
+	}
+	CHECK((a[5] & 3) == 2, "address is unicast and locally administered");
+
+	build(&c, 0, adc, out);
+	CHECK(out[33] == 1 && (out[35] & 0x80) && (out[39] & 0x80), "touch packet with no finger at rest");
+	c.button_map[0] = KO_TOUCHLEFT;
+	c.button_map2[1] = KO_TOUCHRIGHT;
+	build(&c, 1u, adc, out);
+	CHECK((out[7] & 2) && !(out[35] & 0x80) && (out[36] | (out[37] & 0xF) << 8) == 480, "TouchLeft: click + finger at x 480");
+	build(&c, 1ul << 17, adc, out);
+	CHECK((out[7] & 2) && !(out[35] & 0x80) && (out[36] | (out[37] & 0xF) << 8) == 1440, "button 17 through button_map2: x 1440");
+}
+
 int main(void)
 {
 	test_crc_and_validation();
@@ -247,6 +281,7 @@ int main(void)
 	test_triggers();
 	test_remap_and_dpad();
 	test_stock_cal_page();
+	test_address_and_touch();
 	printf("%d checks, %d failures\n", checks, failures);
 	return failures ? 1 : 0;
 }

@@ -71,10 +71,7 @@ static void identity_from_uid(char serial[32])
 			   uid[4 * i + 3];
 	}
 	kcfg_resolve_serial(serial, no_factory_serial, words);
-	for (i = 0; i < 6; i++) {   /* all 128 bits folded into 48 */
-		addr[i] = (uint8_t)(uid[i] ^ uid[i + 6] ^ (i < 4 ? uid[i + 12] : 0));
-	}
-	addr[5] = (uint8_t)((addr[5] & 0xFC) | 0x02);   /* first octet (sent last): unicast, locally administered */
+	ds4_address_from_uid(uid, sizeof(uid), addr);   /* all 128 bits folded into 48 */
 	ds4_set_device_address(addr);
 }
 
