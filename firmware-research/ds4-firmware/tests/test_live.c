@@ -34,6 +34,10 @@ int hw_flash_erase(void)
 	return 0;
 }
 void hw_reboot(void) { reboots++; }
+#ifdef LIVE_HAS_BOOTLOADER
+static int bootloader_entries;
+void hw_enter_bootloader(void) { bootloader_entries++; }
+#endif
 
 /* The image block symbol exists in config.c (defaults on the host, magic + valid? no: crc 0). */
 extern const volatile struct kishi_config kcfg_image;
@@ -228,6 +232,19 @@ static void test_protocol(void)
 	CHECK(reboots == 0, "reboot deferred");
 	live_service();
 	CHECK(reboots == 1, "reboot executed");
+
+	/* Bootloader entry: deferred like reboot where the platform has it, an unknown command everywhere else. */
+	send(LC_BOOTLOADER, 0, NULL);
+	live_get_report(rep);
+#ifdef LIVE_HAS_BOOTLOADER
+	CHECK(rep[2] == LS_OK && bootloader_entries == 0 && (rep[12] & 8), "bootloader entry deferred");
+	live_service();
+	CHECK(bootloader_entries == 1 && reboots == 1, "bootloader entered, no plain reboot");
+#else
+	CHECK(rep[2] == LS_BAD_CMD && !(rep[12] & 8), "bootloader command unknown without LIVE_HAS_BOOTLOADER");
+	live_service();
+	CHECK(reboots == 1, "nothing pending after the unknown bootloader command");
+#endif
 
 	/* Unknown command. */
 	send(99, 0, NULL);

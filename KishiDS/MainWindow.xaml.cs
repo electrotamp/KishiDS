@@ -49,6 +49,7 @@ public partial class MainWindow : Window
             ["Triggers"] = () => new TriggersPage(),
             ["D-pad"] = () => new DpadPage(),
             ["Lighting"] = () => new LightingPage(),
+            ["Rumble"] = () => new RumblePage(),
             ["Calibration"] = () => new CalibrationPage(),
             ["Identity"] = () => new IdentityPage(),
             ["Firmware"] = () => new FirmwarePage(),

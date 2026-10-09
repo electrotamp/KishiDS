@@ -59,7 +59,7 @@
                     <Image Source="/Assets/logo.png" Width="72" Height="72" HorizontalAlignment="Left" Margin="-6,0,0,0" RenderOptions.BitmapScalingMode="HighQuality"/>
                     <TextBlock Text="Welcome to KishiDS" FontFamily="{StaticResource DisplayFont}" FontSize="30" FontWeight="SemiBold" Margin="0,18,0,0"/>
                     <TextBlock Style="{StaticResource BodyDim}" Margin="0,8,0,0"
-                               Text="KishiDS swaps your Razer Kishi V1's firmware so it shows up as a wired DualShock 4, then lets you remap buttons, tune the sticks and triggers and change the light, live over USB."/>
+                               Text="KishiDS swaps your Razer Kishi V1's (or V2 Pro's) firmware so it shows up as a wired DualShock 4, then lets you remap buttons, tune the sticks and triggers and change the light, live over USB."/>
 
                     <Border Style="{StaticResource Card}" Background="{StaticResource PanelInsetBrush}" Padding="22,18" Margin="0,24,0,0" CornerRadius="16">
                         <StackPanel>

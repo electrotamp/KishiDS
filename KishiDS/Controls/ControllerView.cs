@@ -9,7 +9,7 @@ namespace KishiDS.Controls;
 /// The Kishi V1, drawn from the two vector halves (Theme/KishiArt.xaml, generated from SVG/) with a bridge between them.
 /// Pressed buttons glow, the stick caps follow the live axes, the trigger bars fill and the status LED mirrors the LED mode.
 /// </summary>
-public sealed class ControllerView : FrameworkElement
+public sealed partial class ControllerView : FrameworkElement
 {
     public static readonly DependencyProperty InputProperty = Draw.Prop(nameof(Input), typeof(ControllerView), LiveInput.Neutral);
     public static readonly DependencyProperty ButtonMaskProperty = Draw.Prop(nameof(ButtonMask), typeof(ControllerView), 0);
@@ -20,6 +20,12 @@ public sealed class ControllerView : FrameworkElement
     public int ButtonMask { get => (int)GetValue(ButtonMaskProperty); set => SetValue(ButtonMaskProperty, value); }
     public bool Connected { get => (bool)GetValue(ConnectedProperty); set => SetValue(ConnectedProperty, value); }
     public int LedMode { get => (int)GetValue(LedModeProperty); set => SetValue(LedModeProperty, value); }
+
+    /// <summary>Draw the Kishi V2 Pro (ControllerViewV2.cs) instead of the V1.</summary>
+    public static readonly DependencyProperty IsV2ProProperty = Draw.Prop(nameof(IsV2Pro), typeof(ControllerView), false);
+    public static readonly DependencyProperty LedColorProperty = Draw.Prop(nameof(LedColor), typeof(ControllerView), Color.FromRgb(0, 0, 255));
+    public bool IsV2Pro { get => (bool)GetValue(IsV2ProProperty); set => SetValue(IsV2ProProperty, value); }
+    public Color LedColor { get => (Color)GetValue(LedColorProperty); set => SetValue(LedColorProperty, value); }
 
     // Scene, in art units.  Each half is 630 x 890; the left half's open side is x=630 and the right half's is its own x=0.
     private const double HalfW = 630, Gap = 640, Art = 890, Top = -70;
@@ -117,10 +123,10 @@ public sealed class ControllerView : FrameworkElement
         dc.PushOpacity(Connected ? 1.0 : 0.5);
 
         dc.DrawEllipse(Backlight, null, new Point(SceneW / 2, 450), SceneW * 0.52, 560);
-        Bridge(dc);
-        LeftHalf(dc);
+        if (IsV2Pro) V2Bridge(dc); else Bridge(dc);
+        if (IsV2Pro) V2LeftHalf(dc); else LeftHalf(dc);
         dc.PushTransform(new TranslateTransform(RightX, 0));
-        RightHalf(dc);
+        if (IsV2Pro) V2RightHalf(dc); else RightHalf(dc);
         dc.Pop();
 
         dc.Pop();

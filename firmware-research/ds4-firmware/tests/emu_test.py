@@ -152,7 +152,8 @@ def test_config_load(sym, image, results):
     arm = Arm(bytes(patched))
     arm.call(sym["kcfg_load"])
     k = bytes(arm.uc.mem_read(sym["kcfg"], 256))
-    ok = k[33] == 50 and k[47] == 3 and k[50] == 1 and k[35] == 50 and all(b == 18 for b in k[16:32])
+    top = len(gen_config.OUTPUTS) - 1   # highest DS4 output code in the schema
+    ok = k[33] == 50 and k[47] == 3 and k[50] == 1 and k[35] == 50 and all(b == top for b in k[16:32])
     results.append(("out-of-range values clamped", ok))
 
 

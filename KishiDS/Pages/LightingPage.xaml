@@ -8,7 +8,7 @@
         <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="1040"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
         <StackPanel>
             <TextBlock Text="Lighting" Style="{StaticResource PageTitle}"/>
-            <TextBlock Text="The blue status light on your Kishi." Style="{StaticResource Caption}" Margin="0,4,0,0"/>
+            <TextBlock Text="The status light on your Kishi: blue on the V1, any colour on the V2 Pro." Style="{StaticResource Caption}" Margin="0,4,0,0"/>
 
             <Grid Margin="0,22,0,0">
                 <Grid.ColumnDefinitions>
@@ -34,6 +34,34 @@
                     </StackPanel>
                 </Border>
             </Grid>
+
+            <Border Style="{StaticResource Card}" Margin="0,20,0,0">
+                <StackPanel>
+                    <TextBlock Text="Colour" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Text="Kishi V2 Pro only (the V1's light is blue). Games and apps can set their own colour, as with a DualShock 4, unless you keep yours." Style="{StaticResource Caption}" Margin="0,3,0,14" TextWrapping="Wrap"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,0,0,16">
+                        <Border Width="56" Height="56" CornerRadius="28" Background="{Binding S.LedColorBrush}" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1" Margin="0,0,18,0"/>
+                        <ItemsControl x:Name="Swatches" VerticalAlignment="Center">
+                            <ItemsControl.ItemsPanel><ItemsPanelTemplate><WrapPanel/></ItemsPanelTemplate></ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Click="Swatch_Click" Tag="{Binding}" Width="30" Height="30" Margin="0,0,8,8" Cursor="Hand" ToolTip="{Binding}">
+                                        <Button.Template>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border CornerRadius="15" Background="{Binding}" BorderBrush="{StaticResource StrokeBrush}" BorderThickness="1"/>
+                                            </ControlTemplate>
+                                        </Button.Template>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <c:SliderRow Label="Red" Unit="" Minimum="0" Maximum="255" Value="{Binding S.LedRed, Converter={StaticResource I2D}, Mode=TwoWay}"/>
+                    <c:SliderRow Label="Green" Unit="" Minimum="0" Maximum="255" Value="{Binding S.LedGreen, Converter={StaticResource I2D}, Mode=TwoWay}"/>
+                    <c:SliderRow Label="Blue" Unit="" Minimum="0" Maximum="255" Value="{Binding S.LedBlue, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="All three at 0 means the default blue."/>
+                    <c:ToggleRow Label="Keep my colour" IsOn="{Binding S.LedFixed, Mode=TwoWay}" Hint="Games, Steam, iOS and remote-play apps cannot change it."/>
+                </StackPanel>
+            </Border>
         </StackPanel>
         </Grid>
     </ScrollViewer>

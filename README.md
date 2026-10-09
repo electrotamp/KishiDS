@@ -59,6 +59,17 @@ Razer's firmware is **not included** in this repository (it is Razer's copyright
 (`AA915363C858E5A06FB1AD15A82D059D50FD22A625D0663A3CE99FCAB24F69BE`), and keeps it for **Restore original firmware**. The button combination above works
 whatever firmware is installed, so a bad flash of the application can always be recovered from.
 
+## Kishi V2 Pro (experimental)
+
+The same firmware idea ported to the **Razer Kishi V2 Pro (RZ06-0458, NXP LPC55)**, aimed at the iPhone. Working on one unit: it enumerates as a
+wired DualShock 4 on Windows and on iOS (Settings > General > Game Controller), with every button, both sticks and triggers, **rumble** through its
+two DRV2605L haptics drivers (strength adjustable), the **RGB LED** (DS4 lightbar colour, or your own fixed colour), saved settings and calibration,
+M1/M2 as touchpad left/right clicks, and a per-unit serial number and DS4 address taken from the chip's UUID (iOS remembers a DS4 by that address).
+The KishiDS app recognises the V2 Pro (on Razer's firmware, in Razer's bootloader or on KishiDS), shows its own layout and button names, and edits it
+live; flashing it is done with `firmware-research/tools/v2pro_dfu.py`, not from the app. Razer's bootloader is never touched, and View + Menu at
+plug-in always returns to it. Start with [firmware-research/v2pro-firmware/README.md](firmware-research/v2pro-firmware/README.md) and
+[firmware-research/KISHI_V2_PRO.md](firmware-research/KISHI_V2_PRO.md).
+
 ## Repository layout
 
 | Path | What it is |
@@ -66,9 +77,10 @@ whatever firmware is installed, so a bad flash of the application can always be 
 | `KishiDS/` | The .NET 9 WPF app (no NuGet packages). |
 | `KishiDS-Android/` | The Android app (Java, no libraries, built with the plain SDK tools). |
 | `firmware-research/ds4-firmware/` | The controller firmware (C, libopencm3), host tests, and the prebuilt `kishi_ds4.bin`. |
+| `firmware-research/v2pro-firmware/` | The Kishi V2 Pro firmware (C, TinyUSB, freestanding), its emulation and host tests; `tools/v2pro_dfu.py` flashes it. |
 | `firmware-research/tools/` | Python helpers. `gen_config.py` is the single source of the settings schema shared by firmware and app. |
 | `firmware-research/*.md` | Reverse-engineering notes: [board and pin map](firmware-research/BOARD_MAP.md), firmware map, input map, DS4 target, feasibility, [bring-up history](firmware-research/BRINGUP_HISTORY.md). |
-| `firmware-research/third_party/libopencm3` | Git submodule, pinned. |
+| `firmware-research/third_party/libopencm3`, `tinyusb` | Git submodules, pinned. |
 | `docs/` | [Building](docs/BUILDING.md), [engineering notes](docs/ENGINEERING_NOTES.md), screenshots. |
 | `art/`, `SVG/` | Logo and controller artwork used by the app. |
 
@@ -83,6 +95,8 @@ Razer's APKs, its stock firmware images and their decompiled sources are left ou
 - [dfu-util](https://dfu-util.sourceforge.net/) and libusb (GPL-2.0 / LGPL-2.1), bundled as `firmware-research/tools/dfu-util/dfu-util-static.exe` and run as a
   separate program. Build notes: `firmware-research/tools/dfu-util/README.txt`; license text: `firmware-research/tools/dfu-util/COPYING`.
 - The DualShock 4 report descriptor data comes from the Android CTS capture linked in the firmware README.
+- [TinyUSB](https://github.com/hathach/tinyusb) (MIT), the USB stack of the Kishi V2 Pro firmware; included as a submodule. Register offsets in
+  `v2pro-firmware/fsl_device_registers.h` and `lpc55.h` follow NXP's MCUXpresso SDK headers (BSD-3-Clause).
 
 ## License
 

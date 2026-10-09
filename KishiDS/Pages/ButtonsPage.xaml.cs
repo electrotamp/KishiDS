@@ -12,17 +12,13 @@ public partial class ButtonsPage : UserControl
 
     private void ResetRow_Click(object sender, RoutedEventArgs e)
     {
-        if (((FrameworkElement)sender).DataContext is ButtonRow row) row.Output = ConfigBlock.Field("button_map").Default[row.Index];
+        if (((FrameworkElement)sender).DataContext is ButtonRow row) row.Output = row.DefaultOutput;
     }
-
-    private int Row(string name) => Array.IndexOf(ConfigLayout.KishiButtons, name);
 
     private void Swap(string a, string b)
     {
-        int ia = Row(a), ib = Row(b);
-        int va = Model.Config.Get("button_map", ia), vb = Model.Config.Get("button_map", ib);
-        Model.Config.Set("button_map", vb, ia);
-        Model.Config.Set("button_map", va, ib);
+        if (Model.S.Button(a) is not { } ra || Model.S.Button(b) is not { } rb) return;
+        (ra.Output, rb.Output) = (rb.Output, ra.Output);
     }
 
     private void SwapAB_Click(object sender, RoutedEventArgs e) => Swap("A", "B");
@@ -32,9 +28,9 @@ public partial class ButtonsPage : UserControl
     {
         // Bumpers become triggers and the other way round (the Kishi has no physical L2/R2 buttons to swap with,
         // so this maps L1/R1 to L2/R2 and the stick clicks stay put).
-        Model.Config.Set("button_map", Array.IndexOf(ConfigLayout.Outputs, "L2"), Row("L1"));
-        Model.Config.Set("button_map", Array.IndexOf(ConfigLayout.Outputs, "R2"), Row("R1"));
+        if (Model.S.Button("L1") is { } l1) l1.Output = Array.IndexOf(ConfigLayout.Outputs, "L2");
+        if (Model.S.Button("R1") is { } r1) r1.Output = Array.IndexOf(ConfigLayout.Outputs, "R2");
     }
 
-    private void ResetAll_Click(object sender, RoutedEventArgs e) => Model.Config.ResetField("button_map");
+    private void ResetAll_Click(object sender, RoutedEventArgs e) => Model.S.ResetButtons();
 }

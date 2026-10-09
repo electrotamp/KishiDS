@@ -74,6 +74,7 @@
                             <RadioButton Style="{StaticResource NavItem}" Tag="&#xEC48;" Content="Triggers" Click="Nav_Click" x:Name="NavTriggers"/>
                             <RadioButton Style="{StaticResource NavItem}" Tag="&#xF0E2;" Content="D-pad" Click="Nav_Click" x:Name="NavDpad"/>
                             <RadioButton Style="{StaticResource NavItem}" Tag="&#xE706;" Content="Lighting" Click="Nav_Click" x:Name="NavLighting"/>
+                            <RadioButton Style="{StaticResource NavItem}" Tag="&#xE877;" Content="Rumble" Click="Nav_Click" x:Name="NavRumble"/>
                             <Border Height="1" Background="{StaticResource StrokeBrush}" Margin="6,16,6,0"/>
                             <TextBlock Text="DEVICE" Style="{StaticResource Eyebrow}" Margin="14,16,0,8"/>
                             <RadioButton Style="{StaticResource NavItem}" Tag="&#xE9D9;" Content="Calibration" Click="Nav_Click" x:Name="NavCalibration"/>

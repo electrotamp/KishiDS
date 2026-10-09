@@ -110,6 +110,7 @@ struct state {
 	uint8_t face;          /* DS4 byte 5 bits 4..7 */
 	uint8_t btn;           /* DS4 byte 6 */
 	uint8_t misc;          /* DS4 byte 7 bits 0..1 (PS, touchpad click) */
+	uint8_t touch;         /* 1 = a finger on the left half of the touchpad, 2 = on the right half */
 	uint8_t up, down, left, right;
 	uint8_t l2_force, r2_force;
 };
@@ -135,6 +136,8 @@ static void apply_output(struct state *s, unsigned code)
 	case KO_DPADDOWN:  s->down = 1; break;
 	case KO_DPADLEFT:  s->left = 1; break;
 	case KO_DPADRIGHT: s->right = 1; break;
+	case KO_TOUCHLEFT:  s->misc |= 0x02; s->touch = 1; break;   /* click + a finger there: games tell the halves apart */
+	case KO_TOUCHRIGHT: s->misc |= 0x02; s->touch = 2; break;
 	default: break;
 	}
 }
@@ -146,9 +149,10 @@ static uint8_t hat_value(const struct state *s)
 	     : (s->right ? 2 : s->left ? 6 : 8);
 }
 
-void report_build(const struct kishi_config *cfg, const struct kishi_cal *cal, uint16_t buttons,
+void report_build(const struct kishi_config *cfg, const struct kishi_cal *cal, uint32_t buttons,
 		  const uint16_t adc[KISHI_ADC_COUNT], uint8_t counter, uint8_t out[KISHI_REPORT_SIZE])
 {
+	static uint8_t touch_id, last_touch;
 	struct state s;
 	int rx, ry, lx, ly, t;
 	unsigned i, l2, r2;
@@ -157,9 +161,10 @@ void report_build(const struct kishi_config *cfg, const struct kishi_cal *cal, u
 	memset(&s, 0, sizeof(s));
 	memset(out, 0, KISHI_REPORT_SIZE);
 
-	for (i = 0; i < KB_COUNT; i++) {
-		if (buttons & (1u << i)) {
-			apply_output(&s, cfg->button_map[i]);
+	/* Bits 0..15 through button_map (the V1 never sets 15; the V2 Pro's Share does), 16..19 through button_map2. */
+	for (i = 0; i < 20u; i++) {
+		if (buttons & (1ul << i)) {
+			apply_output(&s, i < 16u ? cfg->button_map[i] : cfg->button_map2[i - 16u]);
 		}
 	}
 
@@ -238,4 +243,26 @@ void report_build(const struct kishi_config *cfg, const struct kishi_cal *cal, u
 
 	r[7] = (uint8_t)(s.misc | (counter << 2));
 	r[30] = 0x1B;                    /* wired, battery full */
+
+	/*
+	 * Touchpad (1920 x 942): one touch packet, as a real DS4 sends.  Point bytes: bit 7 set = no finger, bits 0..6 a
+	 * tracking ID that changes with each new touch; then 12-bit X and Y.  TouchLeft/TouchRight put one finger at the
+	 * middle of that half.
+	 */
+	if (s.touch && s.touch != last_touch) {
+		touch_id = (uint8_t)((touch_id + 1u) & 0x7Fu);
+	}
+	last_touch = s.touch;
+	r[33] = 1;
+	r[34] = counter;
+	r[35] = 0x80;
+	r[39] = 0x80;
+	if (s.touch) {
+		unsigned x = s.touch == 1 ? 480u : 1440u, y = 471u;
+
+		r[35] = touch_id;
+		r[36] = (uint8_t)x;
+		r[37] = (uint8_t)((x >> 8) | ((y & 0xFu) << 4));
+		r[38] = (uint8_t)(y >> 4);
+	}
 }

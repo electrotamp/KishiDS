@@ -62,7 +62,7 @@
 
                 <StackPanel Grid.Column="2">
                     <Border Style="{StaticResource Card}" Padding="14,18">
-                        <c:ControllerView Height="190" Input="{Binding Live}" ButtonMask="{Binding Tele.ButtonMask, FallbackValue=0}" Connected="{Binding IsConnected}" LedMode="{Binding S.LedMode, Mode=OneWay}"/>
+                        <c:ControllerView Height="190" Input="{Binding Live}" ButtonMask="{Binding Tele.ButtonMask, FallbackValue=0}" IsV2Pro="{Binding S.IsV2Pro}" LedColor="{Binding S.LedColor}" Connected="{Binding IsConnected}" LedMode="{Binding S.LedMode, Mode=OneWay}"/>
                     </Border>
                     <Border Style="{StaticResource Card}" Margin="0,16,0,0">
                         <StackPanel>

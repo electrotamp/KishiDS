@@ -78,7 +78,7 @@
                         <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Serial, Mode=OneWay, TargetNullValue=—}" Style="{StaticResource KvValue}"/>
                     </Grid>
                 </StackPanel></ScrollViewer>
-                <c:ControllerView Grid.Column="1" Margin="12,0,0,0" Input="{Binding Live}" ButtonMask="{Binding Tele.ButtonMask, FallbackValue=0}"
+                <c:ControllerView Grid.Column="1" Margin="12,0,0,0" Input="{Binding Live}" ButtonMask="{Binding Tele.ButtonMask, FallbackValue=0}" IsV2Pro="{Binding S.IsV2Pro}" LedColor="{Binding S.LedColor}"
                                   Connected="{Binding IsConnected}" LedMode="{Binding S.LedMode, Mode=OneWay}"/>
             </Grid>
         </Border>

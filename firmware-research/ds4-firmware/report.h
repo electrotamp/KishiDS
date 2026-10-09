@@ -28,7 +28,8 @@ void report_cal_from_config(struct kishi_cal *cal, const struct kishi_config *cf
 int report_cal_from_stock_page(struct kishi_cal *cal, const uint8_t *page);
 
 /* Build the 64-byte report (ID 0x01 + 63 payload bytes). */
-void report_build(const struct kishi_config *cfg, const struct kishi_cal *cal, uint16_t buttons,
+/* buttons: bit n = Kishi button n (kishi_io.h), 0..15 through cfg->button_map, 16..19 through cfg->button_map2. */
+void report_build(const struct kishi_config *cfg, const struct kishi_cal *cal, uint32_t buttons,
 		  const uint16_t adc[KISHI_ADC_COUNT], uint8_t counter, uint8_t out[KISHI_REPORT_SIZE]);
 
 #endif

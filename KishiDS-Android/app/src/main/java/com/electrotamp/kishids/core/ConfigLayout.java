@@ -29,7 +29,7 @@ public final class ConfigLayout {
         public int byteSize() { return count * elementSize(); }
     }
 
-    public static final String[] OUTPUTS = { "None", "Square", "Cross", "Circle", "Triangle", "L1", "R1", "L2", "R2", "Share", "Options", "L3", "R3", "PS", "Touchpad", "DpadUp", "DpadDown", "DpadLeft", "DpadRight" };
+    public static final String[] OUTPUTS = { "None", "Square", "Cross", "Circle", "Triangle", "L1", "R1", "L2", "R2", "Share", "Options", "L3", "R3", "PS", "Touchpad", "DpadUp", "DpadDown", "DpadLeft", "DpadRight", "TouchLeft", "TouchRight" };
     public static final String[] KISHI_BUTTONS = { "A", "B", "X", "Y", "Up", "Down", "Left", "Right", "L1", "R1", "L3", "R3", "Right Function", "Home", "Left Function" };
     public static final String[] CURVES = { "Linear", "Precise", "Aggressive" };
     public static final String[] DPAD_MODES = { "D-pad", "Left stick", "Right stick", "Disabled" };
@@ -41,7 +41,7 @@ public final class ConfigLayout {
         new FieldDef("version", 8, Kind.U16, 1, new int[] { 1 }, "", null, null, "Layout version", false),
         new FieldDef("size", 10, Kind.U16, 1, new int[] { 256 }, "", null, null, "Block size in bytes", false),
         new FieldDef("crc32", 12, Kind.U32, 1, new int[] { 0 }, "", null, null, "CRC-32 (ISO-HDLC) of bytes 16..size-1", false),
-        new FieldDef("button_map", 16, Kind.U8, 16, new int[] { 2, 3, 1, 4, 15, 16, 17, 18, 5, 6, 11, 12, 10, 13, 9, 0 }, "", 0, 18, "DS4 output code for each Kishi button (index = scan order)", false),
+        new FieldDef("button_map", 16, Kind.U8, 16, new int[] { 2, 3, 1, 4, 15, 16, 17, 18, 5, 6, 11, 12, 10, 13, 9, 0 }, "", 0, 20, "DS4 output code for each Kishi button (index = scan order)", false),
         new FieldDef("stick_flags", 32, Kind.U8, 1, new int[] { 0 }, "", 0, 31, "bit0 invert LX, bit1 invert LY, bit2 invert RX, bit3 invert RY, bit4 swap sticks", false),
         new FieldDef("left_dead", 33, Kind.U8, 1, new int[] { 8 }, "", 0, 50, "Left stick deadzone, % of travel", false),
         new FieldDef("right_dead", 34, Kind.U8, 1, new int[] { 8 }, "", 0, 50, "Right stick deadzone, % of travel", false),
@@ -62,7 +62,8 @@ public final class ConfigLayout {
         new FieldDef("led_breath", 49, Kind.U8, 1, new int[] { 20 }, "", 5, 100, "Breathing period in 0.1 s units", false),
         new FieldDef("poll_ms", 50, Kind.U8, 1, new int[] { 5 }, "", 1, 8, "USB interrupt polling interval in ms", false),
         new FieldDef("calib_mode", 51, Kind.U8, 1, new int[] { 0 }, "", 0, 1, "0 = stock calibration page, 1 = calibration stored below", false),
-        new FieldDef("reserved1", 52, Kind.U8, 4, new int[] { 0, 0, 0, 0 }, "", null, null, "reserved", false),
+        new FieldDef("rumble_level", 52, Kind.U8, 1, new int[] { 0 }, "", 0, 100, "Rumble strength at full DS4 level, % of the actuators' full scale (0 = board default)", false),
+        new FieldDef("led_rgb", 53, Kind.U8, 3, new int[] { 0, 0, 0 }, "", 0, 255, "RGB LED colour (R, G, B; Kishi V2 Pro); 0, 0, 0 = blue", false),
         new FieldDef("cal_smax", 56, Kind.U16, 4, new int[] { 3264, 3317, 3395, 3360 }, "", 0, 4095, "Stick max raw (RX, RY, LX, LY)", false),
         new FieldDef("cal_smin", 64, Kind.U16, 4, new int[] { 566, 558, 718, 594 }, "", 0, 4095, "Stick min raw (RX, RY, LX, LY)", false),
         new FieldDef("cal_scenter", 72, Kind.U16, 4, new int[] { 1905, 2000, 2036, 1971 }, "", 0, 4095, "Stick centre raw (RX, RY, LX, LY)", false),
@@ -75,6 +76,8 @@ public final class ConfigLayout {
         new FieldDef("manufacturer", 96, Kind.CHAR, 32, new int[0], "ElectroTamp KishiDS", null, null, "USB manufacturer string (locked)", true),
         new FieldDef("product", 128, Kind.CHAR, 32, new int[0], "Wireless Controller", null, null, "USB product string (user-visible device name)", false),
         new FieldDef("serial", 160, Kind.CHAR, 32, new int[0], "", null, null, "USB serial string (locked: always the controller's factory serial, see kcfg_resolve_serial)", true),
-        new FieldDef("reserved3", 192, Kind.U8, 64, new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, "", null, null, "reserved", false),
+        new FieldDef("led_fixed", 192, Kind.U8, 1, new int[] { 0 }, "", 0, 1, "RGB LED: 0 = games/apps may change the colour (DS4 lightbar), 1 = always led_rgb", false),
+        new FieldDef("button_map2", 193, Kind.U8, 4, new int[] { 0, 0, 0, 0 }, "", 0, 20, "DS4 output code for buttons 16..19 (Kishi V2 Pro: M1, M2)", false),
+        new FieldDef("reserved3", 197, Kind.U8, 59, new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 }, "", null, null, "reserved", false),
     };
 }
