@@ -18,8 +18,11 @@
 
 #include "config_layout.h"
 
-/* Flash page (2 KiB) holding the saved record.  0x0800E000 is the DIAG log, 0x0800F800 stock calibration. */
+/* Flash page (2 KiB) holding the saved record.  0x0800E000 is the DIAG log, 0x0800F800 stock calibration.
+ * Other boards (../v2pro-firmware) define their own address on the command line. */
+#ifndef KCFG_SAVED_ADDR
 #define KCFG_SAVED_ADDR   0x0800F000u
+#endif
 #define KCFG_SAVED_COMMIT 0x5AFE5AFEu
 
 /* 264 bytes; the commit word is programmed last so a power cut mid-write leaves an invalid record. */
@@ -71,6 +74,14 @@ void kcfg_resolve_serial(char out[32], const uint8_t factory[KCFG_FACTORY_SERIAL
 
 /* Validate a candidate block; returns 1 if magic/version/size/CRC are all correct. */
 int kcfg_block_valid(const struct kishi_config *c);
+
+#ifdef KCFG_SAVED_VIA_BOARD
+/*
+ * Boards whose saved page cannot simply be read (LPC55: an erased or half-written page faults on a bus read) copy the
+ * record out with a read that cannot fault and point this at the copy before kcfg_load(), or leave it NULL.
+ */
+extern const uint8_t *kcfg_board_saved;
+#endif
 
 #ifdef KCFG_HOST_TEST
 /* Host tests point this at a fake flash page; null means "no saved record". */

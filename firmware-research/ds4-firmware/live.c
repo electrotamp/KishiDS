@@ -6,7 +6,7 @@
 #define CHUNK 32u
 #define CHUNKS (KCFG_SIZE / CHUNK)
 
-enum { PEND_NONE = 0, PEND_SAVE, PEND_ERASE, PEND_REBOOT };
+enum { PEND_NONE = 0, PEND_SAVE, PEND_ERASE, PEND_REBOOT, PEND_BOOTLOADER };
 
 static uint8_t staging[KCFG_SIZE] __attribute__((aligned(4)));
 static uint8_t staged_mask;
@@ -32,7 +32,7 @@ static int identity_differs(void)
 	return boot_cfg.poll_ms != kcfg.poll_ms ||
 	       memcmp(&boot_cfg.vid, &kcfg.vid, offsetof(struct kishi_config, reserved2) - offsetof(struct kishi_config, vid)) != 0 ||
 	       memcmp(boot_cfg.manufacturer, kcfg.manufacturer,
-	              offsetof(struct kishi_config, reserved3) - offsetof(struct kishi_config, manufacturer)) != 0;
+	              offsetof(struct kishi_config, serial) + sizeof(kcfg.serial) - offsetof(struct kishi_config, manufacturer)) != 0;
 }
 
 void live_set_report(const uint8_t *d, unsigned len)
@@ -67,7 +67,11 @@ void live_set_report(const uint8_t *d, unsigned len)
 		staged_mask = 0;
 		break;
 	case LC_READSEL:
+#ifdef LIVE_BOARD_CHUNKS
+		if (idx >= CHUNKS + LIVE_BOARD_CHUNKS) {   /* past the config: the board's own read-only chunks */
+#else
 		if (idx >= CHUNKS) {
+#endif
 			status = LS_BAD_CMD;
 		} else {
 			read_idx = idx;
@@ -82,6 +86,11 @@ void live_set_report(const uint8_t *d, unsigned len)
 	case LC_REBOOT:
 		pending = PEND_REBOOT;
 		break;
+#ifdef LIVE_HAS_BOOTLOADER
+	case LC_BOOTLOADER:
+		pending = PEND_BOOTLOADER;
+		break;
+#endif
 	default:
 		status = LS_BAD_CMD;
 		break;
@@ -116,6 +125,12 @@ void live_get_report(uint8_t *out)
 	}
 	out[12] = flags;
 	out[13] = read_idx;
+#ifdef LIVE_BOARD_CHUNKS
+	if (read_idx >= CHUNKS) {
+		hw_board_chunk((unsigned)(read_idx - CHUNKS), &out[16]);
+		return;
+	}
+#endif
 	memcpy(&out[16], (const uint8_t *)&kcfg + read_idx * CHUNK, CHUNK);
 }
 
@@ -152,6 +167,11 @@ void live_service(void)
 	if (what == PEND_REBOOT) {
 		hw_reboot();
 	}
+#ifdef LIVE_HAS_BOOTLOADER
+	if (what == PEND_BOOTLOADER) {
+		hw_enter_bootloader();
+	}
+#endif
 }
 
 uint8_t live_telemetry_flags(void)

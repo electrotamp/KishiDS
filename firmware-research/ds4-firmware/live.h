@@ -7,10 +7,12 @@
  *   cmd 1 STAGE    idx = chunk 0..7, data = 32 bytes of the config block (chunk idx covers bytes idx*32..+31)
  *   cmd 2 APPLY    all 8 chunks must have been staged; the block must pass magic/version/size/CRC.
  *                  On success it becomes the active configuration immediately (not saved).
- *   cmd 3 READSEL  idx = chunk the next GET returns
+ *   cmd 3 READSEL  idx = chunk the next GET returns (8 and up: board chunks, builds with LIVE_BOARD_CHUNKS)
  *   cmd 4 SAVE     write the active configuration to the flash page (survives power cycles)
  *   cmd 5 ERASE    erase the saved record (next boot uses the image block / defaults)
  *   cmd 6 REBOOT   reset the controller (re-enumerates; needed for USB identity changes)
+ *   cmd 7 BOOTLOADER  restart into the vendor bootloader, for re-flashing.  Only in builds that define
+ *                  LIVE_HAS_BOOTLOADER (the Kishi V2 Pro); elsewhere it is an unknown command (status 2).
  *
  * GET_REPORT 0xAC  (device -> host, 58 bytes):
  *   [0]=0xAC [1]=protocol(1) [2]=status of last command [3]=last command
@@ -33,7 +35,7 @@
 #define LIVE_PROTOCOL    1u
 #define LIVE_REPORT_LEN  58u
 
-enum live_cmd { LC_STAGE = 1, LC_APPLY = 2, LC_READSEL = 3, LC_SAVE = 4, LC_ERASE = 5, LC_REBOOT = 6 };
+enum live_cmd { LC_STAGE = 1, LC_APPLY = 2, LC_READSEL = 3, LC_SAVE = 4, LC_ERASE = 5, LC_REBOOT = 6, LC_BOOTLOADER = 7 };
 enum live_status { LS_OK = 0, LS_BAD_BLOCK = 1, LS_BAD_CMD = 2, LS_FLASH = 3 };
 
 /* Telemetry flag bits (report 0xAB byte 2), set by live_telemetry_flags(). */
@@ -41,6 +43,7 @@ enum live_status { LS_OK = 0, LS_BAD_BLOCK = 1, LS_BAD_CMD = 2, LS_FLASH = 3 };
 #define TELE_FROM_SAVED 0x08u
 #define TELE_UNSAVED    0x10u
 #define TELE_IDENT_DIFF 0x20u
+#define TELE_BOARD_V2PRO 0x40u  /* set by the Kishi V2 Pro's usb_ds4.c: its button names, bits 16..23 in [29] */
 
 /* Snapshot the boot-time configuration (identity fields are only read at USB enumeration). */
 void live_init(void);
@@ -62,5 +65,12 @@ void hw_apply_config(void);                          /* re-derive anything cache
 int hw_flash_save(const struct kcfg_saved *r);   /* 0 on success */
 int hw_flash_erase(void);                            /* 0 on success */
 void hw_reboot(void);
+#ifdef LIVE_HAS_BOOTLOADER
+void hw_enter_bootloader(void);                      /* does not return on hardware */
+#endif
+#ifdef LIVE_BOARD_CHUNKS
+/* READSEL 8 .. 8 + LIVE_BOARD_CHUNKS - 1: 32 bytes of board data instead of the config (V2 Pro: its USB log). */
+void hw_board_chunk(unsigned n, uint8_t out[32]);
+#endif
 
 #endif

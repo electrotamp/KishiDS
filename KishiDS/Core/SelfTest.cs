@@ -110,6 +110,20 @@ public static class SelfTest
         Check("telemetry: live firmware flags and persisted CRC", t1 is { Live: true, FromSaved: true, Unsaved: true, IdentityDiffers: true, PersistedCrc: 0xDEADBEEF });
         var noProto = (byte[])newTele.Clone(); noProto[25] = 0;
         Check("telemetry: live bit without protocol byte is not trusted", DeviceMonitor.ParseTelemetry(noProto) is { Live: false });
+        var v2Tele = (byte[])newTele.Clone(); v2Tele[2] |= 0x40; v2Tele[3] = 0x01; v2Tele[4] = 0x80; v2Tele[29] = 0x02;
+        Check("telemetry: V2 Pro flag, Share (bit 15) and M2 (bit 17)", DeviceMonitor.ParseTelemetry(v2Tele) is { V2Pro: true, ButtonMask: 0x28001 });
+        Check("telemetry: byte 29 ignored without the V2 Pro flag", DeviceMonitor.ParseTelemetry(newTele) is { V2Pro: false } t2 && t2.ButtonMask >> 16 == 0);
+
+        var v2Cfg = new ConfigBlock();
+        var v2S = new Settings(v2Cfg);
+        v2S.SetBoard(true);
+        v2S.ResetButtons();
+        Check("V2 Pro: 18 button rows with its names", v2S.Buttons.Count == 18 && v2S.Buttons[13].Name == "Nexus" && v2S.Buttons[17].Name == "M2");
+        Check("V2 Pro: defaults written (View touchpad, Share, M1/M2 in button_map2)",
+            v2Cfg.Get("button_map", 14) == 14 && v2Cfg.Get("button_map", 15) == 9 && v2Cfg.Get("button_map2", 0) == 19 && v2Cfg.Get("button_map2", 1) == 20 &&
+            v2S.Buttons.All(b => b.IsDefault));
+        v2S.SetBoard(false);
+        Check("V1: back to 15 rows", v2S.Buttons.Count == 15 && v2S.Buttons[12].Name == "Right Function");
 
         var st = new byte[58]; st[0] = 0xAC; st[1] = 1; st[2] = 1; st[3] = 2; st[4] = 1; st[8] = 2; st[12] = 5; st[13] = 7; for (int i = 0; i < 32; i++) st[16 + i] = (byte)i;
         var ps = LiveProtocol.ParseStatus(st);

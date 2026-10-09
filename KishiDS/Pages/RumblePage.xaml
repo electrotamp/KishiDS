@@ -1,0 +1,22 @@
+<UserControl x:Class="KishiDS.Pages.RumblePage"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:c="clr-namespace:KishiDS.Controls">
+    <ScrollViewer>
+        <Grid Margin="0,0,14,60">
+        <Grid.ColumnDefinitions><ColumnDefinition Width="*" MaxWidth="1040"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <StackPanel>
+            <TextBlock Text="Rumble" Style="{StaticResource PageTitle}"/>
+            <TextBlock Text="The two vibration motors of the Kishi V2 Pro (the V1 has none)." Style="{StaticResource Caption}" Margin="0,4,0,0"/>
+
+            <Border Style="{StaticResource Card}" Margin="0,22,0,0">
+                <StackPanel>
+                    <TextBlock Text="Strength" Style="{StaticResource SectionTitle}"/>
+                    <TextBlock Text="How hard the motors run when a game asks for full rumble. Lower levels scale down with it." Style="{StaticResource Caption}" Margin="0,3,0,14"/>
+                    <c:SliderRow Label="Strength" Unit=" %" Minimum="10" Maximum="100" Value="{Binding S.RumblePercent, Converter={StaticResource I2D}, Mode=TwoWay}" Hint="80 % is the default; 100 % is the motors' full scale."/>
+                </StackPanel>
+            </Border>
+        </StackPanel>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

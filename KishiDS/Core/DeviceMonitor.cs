@@ -4,6 +4,9 @@ namespace KishiDS.Core;
 
 public enum DeviceState { Disconnected, Bootloader, StockFirmware, CustomFirmware }
 
+/// <summary>Which Kishi is connected: told by its USB IDs (Razer firmware, bootloader) or by KishiDS telemetry.</summary>
+public enum KishiModel { V1, V2Pro }
+
 /// <summary>A decoded DualShock-4 style input report from the custom firmware.</summary>
 public readonly record struct LiveInput(byte Lx, byte Ly, byte Rx, byte Ry, byte L2, byte R2, int Hat, byte Face, byte Buttons, byte Misc)
 {
@@ -14,8 +17,8 @@ public readonly record struct LiveInput(byte Lx, byte Ly, byte Rx, byte Ry, byte
 /// Firmware telemetry (feature report 0xAB): raw buttons/ADC and which config the firmware is running.
 /// The last five fields come from firmware with live editing; older firmware leaves them at their defaults.
 /// </summary>
-public readonly record struct Telemetry(bool Configured, bool ConfigFromImage, ushort ButtonMask, ushort[] Adc, uint ConfigCrc,
-    bool Live = false, bool FromSaved = false, bool Unsaved = false, bool IdentityDiffers = false, uint PersistedCrc = 0);
+public readonly record struct Telemetry(bool Configured, bool ConfigFromImage, int ButtonMask, ushort[] Adc, uint ConfigCrc,
+    bool Live = false, bool FromSaved = false, bool Unsaved = false, bool IdentityDiffers = false, uint PersistedCrc = 0, bool V2Pro = false);
 
 /// <summary>
 /// Watches for the Kishi (bootloader, stock firmware, or this app's firmware) and, when the custom firmware is
@@ -25,6 +28,14 @@ public readonly record struct Telemetry(bool Configured, bool ConfigFromImage, u
 public sealed class DeviceMonitor : IDisposable
 {
     public const ushort StockVid = 0x27F8, StockPid = 0x0BBF, BootPid = 0x0BC0;
+    /// <summary>Kishi V2 Pro (RZ06-0458): Razer's firmware and Razer's bootloader.</summary>
+    public const ushort V2Vid = 0x1532, V2StockPid = 0x0717, V2BootPid = 0x110E;
+
+    /// <summary>The connected controller's model; null while nothing is connected or it is not known yet.</summary>
+    public KishiModel? Model { get; private set; }
+
+    private static bool Present(IEnumerable<string> ids, ushort vid, ushort pid) =>
+        ids.Any(i => i.Contains($"VID_{vid:X4}&PID_{pid:X4}", StringComparison.OrdinalIgnoreCase));
 
     private readonly CancellationTokenSource _cts = new();
     private readonly object _lock = new();
@@ -76,6 +87,7 @@ public sealed class DeviceMonitor : IDisposable
         State = s;
         if (s != DeviceState.CustomFirmware) { Input = LiveInput.Neutral; Latest = null; }
         if (s is DeviceState.Disconnected or DeviceState.Bootloader) Serial = null;   // the bootloader's serial is not the sticker's
+        if (s is DeviceState.Disconnected or DeviceState.CustomFirmware) Model = null;   // KishiDS firmware: known from telemetry
         StateChanged?.Invoke(s);
     }
 
@@ -102,8 +114,8 @@ public sealed class DeviceMonitor : IDisposable
                 if (_handle is not null) { await Task.Delay(400, ct); continue; }   // the reader owns the connected state
 
                 var ids = Native.PresentUsbDeviceIds();
-                bool boot = ids.Any(i => i.Contains($"VID_{StockVid:X4}&PID_{BootPid:X4}", StringComparison.OrdinalIgnoreCase));
-                if (boot) { SetState(DeviceState.Bootloader); await Task.Delay(500, ct); continue; }
+                bool boot = Present(ids, StockVid, BootPid), boot2 = Present(ids, V2Vid, V2BootPid);
+                if (boot || boot2) { Model = boot ? KishiModel.V1 : KishiModel.V2Pro; SetState(DeviceState.Bootloader); await Task.Delay(500, ct); continue; }
 
                 var hid = TryOpenCustom(out var devPath);
                 if (hid is not null)
@@ -117,9 +129,10 @@ public sealed class DeviceMonitor : IDisposable
                     continue;
                 }
 
-                bool stock = ids.Any(i => i.Contains($"VID_{StockVid:X4}&PID_{StockPid:X4}", StringComparison.OrdinalIgnoreCase));
+                bool stock = Present(ids, StockVid, StockPid), stock2 = !stock && Present(ids, V2Vid, V2StockPid);
                 Serial = stock ? ids.Select(i => SerialFromInstanceId(i, StockVid, StockPid)).FirstOrDefault(s => s is not null) : null;
-                SetState(stock ? DeviceState.StockFirmware : DeviceState.Disconnected);
+                SetState(stock || stock2 ? DeviceState.StockFirmware : DeviceState.Disconnected);
+                if (stock || stock2) Model = stock ? KishiModel.V1 : KishiModel.V2Pro;
                 await Task.Delay(600, ct);
             }
             catch (OperationCanceledException) { return; }
@@ -181,8 +194,11 @@ public sealed class DeviceMonitor : IDisposable
         for (int i = 0; i < 6; i++) adc[i] = (ushort)(buf[5 + 2 * i] | (buf[6 + 2 * i] << 8));
         uint crc = BitConverter.ToUInt32(buf, 17);
         bool live = (buf[2] & 0x04) != 0 && buf[25] == LiveProtocol.Protocol;   // flag + protocol byte: older firmware has neither
-        return new Telemetry((buf[2] & 1) != 0, (buf[2] & 2) != 0, (ushort)(buf[3] | (buf[4] << 8)), adc, crc,
-            live, live && (buf[2] & 0x08) != 0, live && (buf[2] & 0x10) != 0, live && (buf[2] & 0x20) != 0, live ? BitConverter.ToUInt32(buf, 21) : 0);
+        // Kishi V2 Pro (flag 0x40): button bits 16..23 (M1, M2) in byte 29.
+        bool v2 = (buf[2] & 0x40) != 0 && buf.Length > 29;
+        int mask = buf[3] | (buf[4] << 8) | (v2 ? buf[29] << 16 : 0);
+        return new Telemetry((buf[2] & 1) != 0, (buf[2] & 2) != 0, mask, adc, crc,
+            live, live && (buf[2] & 0x08) != 0, live && (buf[2] & 0x10) != 0, live && (buf[2] & 0x20) != 0, live ? BitConverter.ToUInt32(buf, 21) : 0, v2);
     }
 
     // ---------------------------------------------------------------- live editing (blocking; call from a worker thread)
@@ -305,6 +321,7 @@ public sealed class DeviceMonitor : IDisposable
                 PerfTeleMs += (System.Diagnostics.Stopwatch.GetTimestamp() - t0) * 1000.0 / System.Diagnostics.Stopwatch.Frequency; PerfTeleReads++;
                 if (t is null) break;
                 Latest = t;
+                if (t is { } tm) Model = tm.V2Pro ? KishiModel.V2Pro : KishiModel.V1;
                 Updated?.Invoke();
                 Thread.Sleep(4);
             }

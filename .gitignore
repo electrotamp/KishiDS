@@ -1,0 +1,38 @@
+# Razer material: copyrighted, kept local only (see firmware-research/README.md)
+*.apk
+*.apkm
+*.xapk
+**/official-images/
+**/device-backups/
+**/apk-decompiled/
+
+# Firmware build output (the release kishi_ds4.bin stays tracked)
+firmware-research/ds4-firmware/*.o
+firmware-research/ds4-firmware/*.elf
+firmware-research/ds4-firmware/*.map
+firmware-research/ds4-firmware/kishi_ds4_diag.bin
+firmware-research/ds4-firmware/tests/*.out
+firmware-research/ds4-firmware/tests/*.exe
+
+# .NET build output
+KishiDS/bin/
+KishiDS/obj/
+.vs/
+*.user
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Kishi V2 Pro firmware skeleton: build output (not a usable image yet, so nothing is committed)
+firmware-research/v2pro-firmware/*.o
+firmware-research/v2pro-firmware/*.elf
+firmware-research/v2pro-firmware/*.map
+firmware-research/v2pro-firmware/*.bin
+firmware-research/v2pro-firmware/*.hex
+firmware-research/v2pro-firmware/tests/*.exe
+firmware-research/v2pro-firmware/tests/*.dSYM/

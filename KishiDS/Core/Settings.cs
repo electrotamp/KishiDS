@@ -10,15 +10,20 @@ public sealed class ButtonRow : ObservableObject
     private readonly ConfigBlock _cfg;
     private bool _pressed;
 
-    public ButtonRow(ConfigBlock cfg, int index)
+    public ButtonRow(ConfigBlock cfg, int index, string name, int defaultOutput)
     {
         _cfg = cfg;
         Index = index;
-        Name = ConfigLayout.KishiButtons[index];
+        Name = name;
+        DefaultOutput = defaultOutput;
     }
 
+    /// <summary>Button bit / mapping slot: 0..15 in button_map, 16..19 in button_map2.</summary>
     public int Index { get; }
     public string Name { get; }
+    public int DefaultOutput { get; }
+    private string Field => Index < 16 ? "button_map" : "button_map2";
+    private int Slot => Index < 16 ? Index : Index - 16;
     private static readonly string[] Pretty = ConfigLayout.Outputs.Select(o => o switch
     {
         "None" => "Disabled",
@@ -28,6 +33,8 @@ public sealed class ButtonRow : ObservableObject
         "DpadRight" => "D-pad Right",
         "PS" => "PS button",
         "Touchpad" => "Touchpad click",
+        "TouchLeft" => "Touchpad left click",
+        "TouchRight" => "Touchpad right click",
         _ => o,
     }).ToArray();
 
@@ -35,11 +42,11 @@ public sealed class ButtonRow : ObservableObject
 
     public int Output
     {
-        get => _cfg.Get("button_map", Index);
-        set { _cfg.Set("button_map", value, Index); Raise(); Raise(nameof(IsDefault)); }
+        get => _cfg.Get(Field, Slot);
+        set { _cfg.Set(Field, value, Slot); Raise(); Raise(nameof(IsDefault)); }
     }
 
-    public bool IsDefault => Output == ConfigBlock.Field("button_map").Default[Index];
+    public bool IsDefault => Output == DefaultOutput;
 
     /// <summary>True while the physical button is held (from firmware telemetry).</summary>
     public bool Pressed { get => _pressed; set => Set(ref _pressed, value); }
@@ -53,10 +60,34 @@ public sealed class Settings : ObservableObject
     public ConfigBlock Cfg { get; }
     public ObservableCollection<ButtonRow> Buttons { get; } = new();
 
+    /// <summary>True when the connected controller is a Kishi V2 Pro (telemetry flag): its button names and extras.</summary>
+    public bool IsV2Pro { get; private set; }
+
+    public void SetBoard(bool v2Pro)
+    {
+        if (v2Pro == IsV2Pro && Buttons.Count > 0) return;
+        IsV2Pro = v2Pro;
+        Buttons.Clear();
+        var names = v2Pro ? ConfigLayout.V2ProButtons : ConfigLayout.KishiButtons;
+        var v1Defaults = ConfigBlock.Field("button_map").Default;
+        for (int i = 0; i < names.Length; i++)
+            Buttons.Add(new ButtonRow(Cfg, i, names[i], v2Pro ? ConfigLayout.V2ProButtonMap[i] : v1Defaults[i]));
+        Raise(nameof(IsV2Pro));
+        Raise(nameof(RemappedCount));
+    }
+
+    /// <summary>Every button back to this board's default mapping.</summary>
+    public void ResetButtons()
+    {
+        foreach (var b in Buttons) b.Output = b.DefaultOutput;
+    }
+
+    public ButtonRow? Button(string name) => Buttons.FirstOrDefault(b => b.Name == name);
+
     public Settings(ConfigBlock cfg)
     {
         Cfg = cfg;
-        for (int i = 0; i < ConfigLayout.KishiButtons.Length; i++) Buttons.Add(new ButtonRow(cfg, i));
+        SetBoard(false);
         cfg.Changed += _ =>
         {
             Raise(string.Empty);                  // every property may have changed
@@ -116,6 +147,25 @@ public sealed class Settings : ObservableObject
     public int LedBreath { get => Num(); set => Num(value); }
     public double LedBreathSeconds { get => LedBreath / 10.0; set => LedBreath = (int)Math.Round(value * 10); }
     public bool LedBreathVisible => LedMode == 2;
+
+    // ---- RGB LED colour (Kishi V2 Pro; the V1's LED is blue only) ----
+    public int LedRed { get => Cfg.Get("led_rgb", 0); set => Cfg.Set("led_rgb", value, 0); }
+    public int LedGreen { get => Cfg.Get("led_rgb", 1); set => Cfg.Set("led_rgb", value, 1); }
+    public int LedBlue { get => Cfg.Get("led_rgb", 2); set => Cfg.Set("led_rgb", value, 2); }
+    /// <summary>True: the colour stays even when a game or app sets the DS4 lightbar.</summary>
+    public bool LedFixed { get => Cfg.Get("led_fixed") == 1; set => Cfg.Set("led_fixed", value ? 1 : 0); }
+    /// <summary>The colour the firmware shows: 0, 0, 0 in the config means its default, blue.</summary>
+    public System.Windows.Media.Color LedColor => LedRed == 0 && LedGreen == 0 && LedBlue == 0
+        ? System.Windows.Media.Color.FromRgb(0, 0, 255)
+        : System.Windows.Media.Color.FromRgb((byte)LedRed, (byte)LedGreen, (byte)LedBlue);
+    public System.Windows.Media.Brush LedColorBrush => new System.Windows.Media.SolidColorBrush(LedColor);
+
+    public void SetLedColor(byte r, byte g, byte b) { LedRed = r; LedGreen = g; LedBlue = b; }
+
+    // ---- Rumble (Kishi V2 Pro; the V1 has no actuators) ----
+    public int RumbleLevel { get => Num(); set => Num(value); }
+    /// <summary>The strength the firmware uses: rumble_level 0 means its default, 80 %.</summary>
+    public int RumblePercent { get => RumbleLevel == 0 ? 80 : RumbleLevel; set => RumbleLevel = Math.Clamp(value, 1, 100); }
 
     // ---- USB identity ----
     public string Manufacturer => Cfg.GetString("manufacturer");

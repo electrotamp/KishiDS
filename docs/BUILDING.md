@@ -121,8 +121,17 @@ sha256 898615797ebd5cb0858d7831f5b86b705cff6d02796993d7c2bd37ad6d109897
 `build.sh` compiles each source file with `arm-none-eabi-gcc`, links at the vendor application base `0x08003000`, converts to a raw binary, and runs
 `tools/finalize_image.py`, which stamps the config block's CRC and checks that the vector table sits inside the application region.
 
-**Reproducibility:** with the same devkitARM (gcc 16.1.0) the output is byte-for-byte identical to the committed `kishi_ds4.bin`, and the hash above
-matches. A different compiler version may produce a different binary that behaves the same; the hash will then differ, which is expected.
+**Reproducibility:** the committed `kishi_ds4.bin` (hash above) was built with devkitARM (gcc 16.1.0) before the DS4 descriptor and
+fixed feature reports moved from `main.c` into the shared `ds4_usb.c` (also used by the Kishi V2 Pro firmware). The current source therefore
+no longer rebuilds it byte for byte, even with that devkitARM: the code moved, the bytes the controller serves did not. That was checked by
+running the request handler of both builds in an emulator for the report descriptor and every report ID (all replies identical), plus the
+host and ARM-emulator tests below. The next release should rebuild `kishi_ds4.bin` with devkitARM, update the hash above, and rebuild the
+app, which embeds the image. A different compiler version may also produce a different binary that behaves the same; the hash then differs,
+which is expected.
+
+**macOS / Linux:** the [Arm GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads) (it includes newlib, which
+libopencm3 and the firmware need; Homebrew's `arm-none-eabi-gcc` does not) works too: put its `bin` on `PATH`, build libopencm3 as in 4.2,
+then `./build.sh`. `build.sh` uses `python3` when `python` is not installed.
 
 Other build modes:
 

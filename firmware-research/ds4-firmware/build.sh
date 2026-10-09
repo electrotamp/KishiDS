@@ -14,9 +14,12 @@ if [ "$1" = "clean" ]; then
 	exit 0
 fi
 
+# Windows installs usually provide "python"; macOS and Linux often only "python3".
+PY=$(command -v python || command -v python3)
+
 OUT=kishi_ds4
 EXTRA=""
-SRCS="main kishi_io config report led live persist"
+SRCS="main kishi_io config report led live persist ds4_usb"
 if [ -n "$DIAG" ]; then OUT=kishi_ds4_diag; EXTRA="-DDIAG"; SRCS="$SRCS diag"; fi
 
 CF="$EXTRA -Os -g3 -std=c99 -mthumb -mcpu=cortex-m0 -msoft-float -DSTM32F0 -I../third_party/libopencm3/include -Wall -Wextra -Wshadow -Wstrict-prototypes -ffunction-sections -fdata-sections"
@@ -30,10 +33,10 @@ arm-none-eabi-gcc -Tstm32f072_kishi_app3000.ld -nostartfiles -mthumb -mcpu=corte
 	-L../third_party/libopencm3/lib -Wl,--start-group -lopencm3_stm32f0 -lc -lgcc -lnosys -Wl,--end-group \
 	-o $OUT.elf
 arm-none-eabi-objcopy -Obinary $OUT.elf $OUT.bin
-python ../tools/finalize_image.py $OUT.bin
+"$PY" ../tools/finalize_image.py $OUT.bin
 arm-none-eabi-size $OUT.elf
 
-python - "$OUT" <<'PY'
+"$PY" - "$OUT" <<'PY'
 import hashlib, struct, sys
 name = sys.argv[1] + ".bin"
 d = open(name, "rb").read()

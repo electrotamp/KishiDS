@@ -31,8 +31,14 @@ enum kcfg_output {
 	KO_DPADDOWN = 16,
 	KO_DPADLEFT = 17,
 	KO_DPADRIGHT = 18,
-	KO_COUNT = 19
+	KO_TOUCHLEFT = 19,
+	KO_TOUCHRIGHT = 20,
+	KO_COUNT = 21
 };
+
+/* Kishi V2 Pro default button mapping (board_defaults.h). */
+#define KCFG_V2PRO_BUTTON_MAP  {2, 3, 1, 4, 15, 16, 17, 18, 5, 6, 11, 12, 10, 13, 14, 9}
+#define KCFG_V2PRO_BUTTON_MAP2 {19, 20, 0, 0}
 
 struct __attribute__((packed)) kishi_config {
 	char magic[8];  /* 0: Marker used to find the block in the image */
@@ -60,7 +66,8 @@ struct __attribute__((packed)) kishi_config {
 	uint8_t led_breath;  /* 49: Breathing period in 0.1 s units */
 	uint8_t poll_ms;  /* 50: USB interrupt polling interval in ms */
 	uint8_t calib_mode;  /* 51: 0 = stock calibration page, 1 = calibration stored below */
-	uint8_t reserved1[4];  /* 52: reserved */
+	uint8_t rumble_level;  /* 52: Rumble strength at full DS4 level, % of the actuators' full scale (0 = board default) */
+	uint8_t led_rgb[3];  /* 53: RGB LED colour (R, G, B; Kishi V2 Pro); 0, 0, 0 = blue */
 	uint16_t cal_smax[4];  /* 56: Stick max raw (RX, RY, LX, LY) */
 	uint16_t cal_smin[4];  /* 64: Stick min raw (RX, RY, LX, LY) */
 	uint16_t cal_scenter[4];  /* 72: Stick centre raw (RX, RY, LX, LY) */
@@ -73,7 +80,9 @@ struct __attribute__((packed)) kishi_config {
 	char manufacturer[32];  /* 96: USB manufacturer string (locked) */
 	char product[32];  /* 128: USB product string (user-visible device name) */
 	char serial[32];  /* 160: USB serial string (locked: always the controller's factory serial, see kcfg_resolve_serial) */
-	uint8_t reserved3[64];  /* 192: reserved */
+	uint8_t led_fixed;  /* 192: RGB LED: 0 = games/apps may change the colour (DS4 lightbar), 1 = always led_rgb */
+	uint8_t button_map2[4];  /* 193: DS4 output code for buttons 16..19 (Kishi V2 Pro: M1, M2) */
+	uint8_t reserved3[59];  /* 197: reserved */
 };
 
 _Static_assert(sizeof(struct kishi_config) == 256, "config size");
@@ -102,7 +111,8 @@ _Static_assert(offsetof(struct kishi_config, led_brightness) == 48, "led_brightn
 _Static_assert(offsetof(struct kishi_config, led_breath) == 49, "led_breath offset");
 _Static_assert(offsetof(struct kishi_config, poll_ms) == 50, "poll_ms offset");
 _Static_assert(offsetof(struct kishi_config, calib_mode) == 51, "calib_mode offset");
-_Static_assert(offsetof(struct kishi_config, reserved1) == 52, "reserved1 offset");
+_Static_assert(offsetof(struct kishi_config, rumble_level) == 52, "rumble_level offset");
+_Static_assert(offsetof(struct kishi_config, led_rgb) == 53, "led_rgb offset");
 _Static_assert(offsetof(struct kishi_config, cal_smax) == 56, "cal_smax offset");
 _Static_assert(offsetof(struct kishi_config, cal_smin) == 64, "cal_smin offset");
 _Static_assert(offsetof(struct kishi_config, cal_scenter) == 72, "cal_scenter offset");
@@ -115,7 +125,9 @@ _Static_assert(offsetof(struct kishi_config, reserved2) == 94, "reserved2 offset
 _Static_assert(offsetof(struct kishi_config, manufacturer) == 96, "manufacturer offset");
 _Static_assert(offsetof(struct kishi_config, product) == 128, "product offset");
 _Static_assert(offsetof(struct kishi_config, serial) == 160, "serial offset");
-_Static_assert(offsetof(struct kishi_config, reserved3) == 192, "reserved3 offset");
+_Static_assert(offsetof(struct kishi_config, led_fixed) == 192, "led_fixed offset");
+_Static_assert(offsetof(struct kishi_config, button_map2) == 193, "button_map2 offset");
+_Static_assert(offsetof(struct kishi_config, reserved3) == 197, "reserved3 offset");
 
 /* Defaults without the magic: the fallback copy must not contain the marker bytes. */
 #define KCFG_DEFAULTS_BODY \
@@ -142,6 +154,8 @@ _Static_assert(offsetof(struct kishi_config, reserved3) == 192, "reserved3 offse
 	.led_breath = 0x14, \
 	.poll_ms = 5, \
 	.calib_mode = 0, \
+	.rumble_level = 0, \
+	.led_rgb = {0, 0, 0}, \
 	.cal_smax = {3264, 3317, 3395, 3360}, \
 	.cal_smin = {566, 558, 718, 594}, \
 	.cal_scenter = {1905, 2000, 2036, 1971}, \
@@ -153,6 +167,8 @@ _Static_assert(offsetof(struct kishi_config, reserved3) == 192, "reserved3 offse
 	.manufacturer = "ElectroTamp KishiDS", \
 	.product = "Wireless Controller", \
 	.serial = "", \
+	.led_fixed = 0, \
+	.button_map2 = {0, 0, 0, 0}, \
 	.crc32 = 0
 
 #define KCFG_DEFAULTS { .magic = KCFG_MAGIC, KCFG_DEFAULTS_BODY }
@@ -163,7 +179,7 @@ static inline void kcfg_clamp(struct kishi_config *c)
 	unsigned i;
 	(void)i;
 	for (i = 0; i < 16; i++) {
-		if (c->button_map[i] > 18) c->button_map[i] = 18;
+		if (c->button_map[i] > 20) c->button_map[i] = 20;
 	}
 	if (c->stick_flags > 31) c->stick_flags = 31;
 	if (c->left_dead > 50) c->left_dead = 50;
@@ -189,6 +205,7 @@ static inline void kcfg_clamp(struct kishi_config *c)
 	if (c->poll_ms < 1) c->poll_ms = 1;
 	if (c->poll_ms > 8) c->poll_ms = 8;
 	if (c->calib_mode > 1) c->calib_mode = 1;
+	if (c->rumble_level > 100) c->rumble_level = 100;
 	for (i = 0; i < 4; i++) {
 		if (c->cal_smax[i] > 4095) c->cal_smax[i] = 4095;
 	}
@@ -211,6 +228,10 @@ static inline void kcfg_clamp(struct kishi_config *c)
 	memcpy(c->manufacturer, "ElectroTamp KishiDS", 19);
 	memset(c->serial, 0, sizeof(c->serial));
 	memcpy(c->serial, "", 0);
+	if (c->led_fixed > 1) c->led_fixed = 1;
+	for (i = 0; i < 4; i++) {
+		if (c->button_map2[i] > 20) c->button_map2[i] = 20;
+	}
 }
 
 #endif

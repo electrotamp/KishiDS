@@ -10,6 +10,16 @@
             <TextBlock Text="Firmware" Style="{StaticResource PageTitle}"/>
             <TextBlock Text="Update the controller's firmware (needed only once to switch on live editing), or put the original firmware back." Style="{StaticResource Caption}" Margin="0,4,0,0"/>
 
+            <!-- Kishi V2 Pro: flashed with tools/v2pro_dfu.py, not from this page -->
+            <Border Margin="0,18,0,0" CornerRadius="16" Padding="22,16" Background="{StaticResource AccentSoftBrush}" BorderBrush="{StaticResource AccentHiBrush}" BorderThickness="1"
+                    Visibility="{Binding IsV2Pro, Converter={StaticResource B2V}}">
+                <StackPanel>
+                    <TextBlock Text="Kishi V2 Pro: firmware is written with tools/v2pro_dfu.py" FontWeight="SemiBold" FontSize="14.5" TextWrapping="Wrap"/>
+                    <TextBlock Style="{StaticResource Caption}" FontSize="13" Margin="0,3,0,0" TextWrapping="Wrap"
+                               Text="Its bootloader speaks Razer's own protocol, so this page (which flashes the V1) is not used for it. To enter it: hold View + Menu while plugging in, or 'v2pro_dfu.py enter'; 'flash --custom' writes KishiDS, 'flash' with Razer's 2.2 image restores it. Every other page edits the V2 Pro live."/>
+                </StackPanel>
+            </Border>
+
             <!-- Warning: no copy of Razer's firmware saved yet -->
             <Border Margin="0,18,0,0" CornerRadius="16" Padding="22,16" Background="{StaticResource WarnSoftBrush}" BorderBrush="{StaticResource WarnBrush}" BorderThickness="1"
                     Visibility="{Binding ShowOriginalWarning, Converter={StaticResource B2V}}">

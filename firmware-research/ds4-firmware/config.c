@@ -10,9 +10,20 @@
  * It is volatile on purpose: the compiler must not constant-fold the initialiser into the
  * code, or a patched image would be silently ignored.  It is always read byte-wise.
  */
-__attribute__((used)) const volatile struct kishi_config kcfg_image = KCFG_DEFAULTS;
+/*
+ * A board can override some defaults (the Kishi V2 Pro's calibration) with a header that defines
+ * KCFG_BOARD_OVERRIDES as ", .field = value ...", named by KCFG_BOARD_OVERRIDES_HEADER.  Without it (the V1) the
+ * initialisers are exactly KCFG_DEFAULTS.
+ */
+#ifdef KCFG_BOARD_OVERRIDES_HEADER
+#include KCFG_BOARD_OVERRIDES_HEADER
+#else
+#define KCFG_BOARD_OVERRIDES
+#endif
 
-static const struct kishi_config kcfg_defaults = { KCFG_DEFAULTS_BODY };
+__attribute__((used)) const volatile struct kishi_config kcfg_image = { .magic = KCFG_MAGIC, KCFG_DEFAULTS_BODY KCFG_BOARD_OVERRIDES };
+
+static const struct kishi_config kcfg_defaults = { KCFG_DEFAULTS_BODY KCFG_BOARD_OVERRIDES };
 
 struct kishi_config kcfg;
 uint8_t kcfg_from_image;
@@ -22,9 +33,11 @@ uint32_t kcfg_image_id;
 uint32_t kcfg_persisted_crc;
 uint32_t kcfg_fallback_crc;
 
-#ifdef KCFG_HOST_TEST
+#if defined(KCFG_HOST_TEST)
 const uint8_t *kcfg_test_saved;
 #define SAVED_PAGE (kcfg_test_saved)
+#elif defined(KCFG_SAVED_VIA_BOARD)
+#define SAVED_PAGE (kcfg_board_saved)
 #else
 #define SAVED_PAGE ((const uint8_t *)KCFG_SAVED_ADDR)
 #endif

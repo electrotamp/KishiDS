@@ -7,3 +7,7 @@ CC=${CC:-$(command -v gcc || command -v clang || command -v x86_64-w64-mingw32-g
 ./tests/test_report.exe
 "$CC" -std=c11 -Wall -Wextra -Werror -DKCFG_HOST_TEST=1 -I. tests/test_live.c live.c config.c -o tests/test_live.exe
 ./tests/test_live.exe
+# Same tests with the Kishi V2 Pro's bootloader command compiled in.
+"$CC" -std=c11 -Wall -Wextra -Werror -DKCFG_HOST_TEST=1 -DLIVE_HAS_BOOTLOADER -I. tests/test_live.c live.c config.c \
+	-o tests/test_live_boot.exe
+./tests/test_live_boot.exe

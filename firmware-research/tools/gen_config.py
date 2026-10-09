@@ -26,11 +26,18 @@ CONFIG_VERSION = 1
 # DS4 output codes a Kishi button can be mapped to.
 OUTPUTS = [
     "None", "Square", "Cross", "Circle", "Triangle", "L1", "R1", "L2", "R2", "Share", "Options",
-    "L3", "R3", "PS", "Touchpad", "DpadUp", "DpadDown", "DpadLeft", "DpadRight",
+    "L3", "R3", "PS", "Touchpad", "DpadUp", "DpadDown", "DpadLeft", "DpadRight", "TouchLeft", "TouchRight",
 ]
 # Physical Kishi buttons in firmware scan order (kishi_io.h enum kishi_button).
 KISHI_BUTTONS = ["A", "B", "X", "Y", "Up", "Down", "Left", "Right", "L1", "R1", "L3", "R3",
                  "Right Function", "Home", "Left Function"]
+# The Kishi V2 Pro's names for the same slots, then its extras: Share in button_map[15], M1/M2 in button_map2.
+V2PRO_BUTTONS = ["A", "B", "X", "Y", "Up", "Down", "Left", "Right", "L1", "R1", "L3", "R3",
+                 "Menu", "Nexus", "View", "Share", "M1", "M2"]
+# Its default mapping (v2pro-firmware/board_defaults.h): as the V1's, but View -> Touchpad, Share -> Share, and
+# M1 / M2 -> TouchLeft / TouchRight.
+V2PRO_BUTTON_MAP = [2, 3, 1, 4, 15, 16, 17, 18, 5, 6, 11, 12, 10, 13, 14, 9]
+V2PRO_BUTTON_MAP2 = [19, 20, 0, 0]
 CURVES = ["Linear", "Precise", "Aggressive"]
 DPAD_MODES = ["D-pad", "Left stick", "Right stick", "Disabled"]
 SOCD_MODES = ["Neutral", "Up/Right wins"]
@@ -73,7 +80,8 @@ field("led_brightness", 48, "u8", 1, 255, 0, 255, "Blue LED brightness")
 field("led_breath", 49, "u8", 1, 20, 5, 100, "Breathing period in 0.1 s units")
 field("poll_ms", 50, "u8", 1, 5, 1, 8, "USB interrupt polling interval in ms")
 field("calib_mode", 51, "u8", 1, 0, 0, 1, "0 = stock calibration page, 1 = calibration stored below")
-field("reserved1", 52, "u8", 4, [0, 0, 0, 0], doc="reserved")
+field("rumble_level", 52, "u8", 1, 0, 0, 100, "Rumble strength at full DS4 level, % of the actuators' full scale (0 = board default)")
+field("led_rgb", 53, "u8", 3, [0, 0, 0], 0, 255, "RGB LED colour (R, G, B; Kishi V2 Pro); 0, 0, 0 = blue")
 # Calibration, indexed in ADC scan order: ch1 RX, ch2 RY, ch5 LY, ch6 LX  -> stick index 0..3 = RX, RY, LX, LY
 field("cal_smax", 56, "u16", 4, [3264, 3317, 3395, 3360], 0, 4095, "Stick max raw (RX, RY, LX, LY)")
 field("cal_smin", 64, "u16", 4, [566, 558, 718, 594], 0, 4095, "Stick min raw (RX, RY, LX, LY)")
@@ -87,7 +95,9 @@ field("reserved2", 94, "u8", 2, [0, 0], doc="reserved")
 field("manufacturer", 96, "char", 32, "ElectroTamp KishiDS", doc="USB manufacturer string (locked)", locked=True)
 field("product", 128, "char", 32, "Wireless Controller", doc="USB product string (user-visible device name)")
 field("serial", 160, "char", 32, "", doc="USB serial string (locked: always the controller's factory serial, see kcfg_resolve_serial)", locked=True)
-field("reserved3", 192, "u8", 64, [0] * 64, doc="reserved")
+field("led_fixed", 192, "u8", 1, 0, 0, 1, "RGB LED: 0 = games/apps may change the colour (DS4 lightbar), 1 = always led_rgb")
+field("button_map2", 193, "u8", 4, [0, 0, 0, 0], 0, len(OUTPUTS) - 1, "DS4 output code for buttons 16..19 (Kishi V2 Pro: M1, M2)")
+field("reserved3", 197, "u8", 59, [0] * 59, doc="reserved")
 
 SIZES = {"u8": 1, "u16": 2, "u32": 4, "char": 1}
 CT = {"u8": "uint8_t", "u16": "uint16_t", "u32": "uint32_t", "char": "char"}
@@ -126,6 +136,9 @@ def gen_c() -> str:
     for i, n in enumerate(OUTPUTS):
         o.append(f"\tKO_{n.upper()} = {i},")
     o.append(f"\tKO_COUNT = {len(OUTPUTS)}\n}};\n")
+    o.append("/* Kishi V2 Pro default button mapping (board_defaults.h). */")
+    o.append("#define KCFG_V2PRO_BUTTON_MAP  {" + ", ".join(map(str, V2PRO_BUTTON_MAP)) + "}")
+    o.append("#define KCFG_V2PRO_BUTTON_MAP2 {" + ", ".join(map(str, V2PRO_BUTTON_MAP2)) + "}\n")
     o.append("struct __attribute__((packed)) kishi_config {")
     for f in F:
         arr = f"[{f['count']}]" if f["count"] > 1 else ""
@@ -196,6 +209,8 @@ def gen_cs() -> str:
         return f"    public static readonly string[] {name} = {{ " + ", ".join('"%s"' % cs_escape(x) for x in items) + " };"
     o.append(arr("Outputs", OUTPUTS))
     o.append(arr("KishiButtons", KISHI_BUTTONS))
+    o.append(arr("V2ProButtons", V2PRO_BUTTONS))
+    o.append("    public static readonly int[] V2ProButtonMap = { " + ", ".join(map(str, V2PRO_BUTTON_MAP + V2PRO_BUTTON_MAP2)) + " };")
     o.append(arr("Curves", CURVES))
     o.append(arr("DpadModes", DPAD_MODES))
     o.append(arr("SocdModes", SOCD_MODES))

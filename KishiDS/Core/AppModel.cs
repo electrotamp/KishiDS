@@ -89,11 +89,24 @@ public sealed class AppModel : ObservableObject, IDisposable
     public string? Serial { get => _serial; private set { if (Set(ref _serial, value)) Raise(nameof(SerialText)); } }
     public string SerialText => Serial ?? "Shown when your Kishi is connected";
 
+    /// <summary>The last model seen (kept while unplugged, so the pages keep showing it); V1 until a controller says otherwise.</summary>
+    public KishiModel Model { get; private set; } = KishiModel.V1;
+    public bool IsV2Pro => Model == KishiModel.V2Pro;
+    public string ModelName => IsV2Pro ? "Kishi V2 Pro" : "Kishi V1";
+
+    private void SetModel(KishiModel m)
+    {
+        if (m == Model && S.IsV2Pro == IsV2Pro) return;
+        Model = m;
+        S.SetBoard(IsV2Pro);
+        Raise(nameof(Model)); Raise(nameof(IsV2Pro)); Raise(nameof(ModelName)); Raise(nameof(ShowOriginalWarning)); Raise(nameof(ShowApplyButton)); Raise(nameof(DeviceTitle)); Raise(nameof(DeviceDetail));
+    }
+
     public string DeviceTitle => Device switch
     {
-        DeviceState.CustomFirmware => "Kishi connected",
-        DeviceState.StockFirmware => "Kishi (stock firmware)",
-        DeviceState.Bootloader => "Bootloader ready",
+        DeviceState.CustomFirmware => $"{ModelName} connected",
+        DeviceState.StockFirmware => $"{ModelName} (stock firmware)",
+        DeviceState.Bootloader => IsV2Pro ? "V2 Pro bootloader" : "Bootloader ready",
         _ => "No controller",
     };
 
@@ -102,9 +115,11 @@ public sealed class AppModel : ObservableObject, IDisposable
         DeviceState.CustomFirmware when IsLive => "Live editing is on. Changes apply instantly.",
         DeviceState.CustomFirmware when Tele is not null => "Older KishiDS firmware. Apply once to switch on live editing.",
         DeviceState.CustomFirmware => "Running KishiDS firmware",
+        DeviceState.StockFirmware when IsV2Pro => "Original Razer firmware. The V2 Pro is switched with tools/v2pro_dfu.py (not from this app yet).",
         DeviceState.StockFirmware => "Original Razer firmware. Apply to switch to KishiDS firmware.",
+        DeviceState.Bootloader when IsV2Pro => "Flash it with tools/v2pro_dfu.py; this app flashes the V1 only.",
         DeviceState.Bootloader => "In firmware-update mode, ready to flash",
-        _ => "Plug in your Kishi V1 to get started",
+        _ => "Plug in your Kishi V1 or V2 Pro to get started",
     };
 
     /// <summary>True when the controller is running exactly the settings shown here.</summary>
@@ -132,7 +147,7 @@ public sealed class AppModel : ObservableObject, IDisposable
     public bool IsLive => Device == DeviceState.CustomFirmware && Tele is { Live: true };
 
     /// <summary>The "Apply to controller" (update mode) button is only needed without live editing.</summary>
-    public bool ShowApplyButton => !IsLive;
+    public bool ShowApplyButton => !IsLive && !IsV2Pro;   // the V2 Pro is flashed with tools/v2pro_dfu.py
 
     private bool _linked;          // app settings and controller are tied together: edits are sent as they happen
     private bool _pushing, _pushAgain;
@@ -277,6 +292,7 @@ public sealed class AppModel : ObservableObject, IDisposable
         var t = Monitor.Latest;
         if (!SameTelemetry(t, Tele)) Tele = t;
         else if (t is not null) _tele = t;   // only the analog readings moved: keep them current without re-evaluating every binding
+        if (Monitor.Model is { } m) SetModel(m);
         UpdateLiveLink();
         RefreshStatus();
         UpdatePressed();
@@ -287,11 +303,11 @@ public sealed class AppModel : ObservableObject, IDisposable
         a is null ? b is null : b is not null && a.Value.ButtonMask == b.Value.ButtonMask && a.Value.ConfigCrc == b.Value.ConfigCrc &&
                                 a.Value.Configured == b.Value.Configured &&
                                 a.Value.Live == b.Value.Live && a.Value.Unsaved == b.Value.Unsaved && a.Value.IdentityDiffers == b.Value.IdentityDiffers &&
-                                a.Value.FromSaved == b.Value.FromSaved;
+                                a.Value.FromSaved == b.Value.FromSaved && a.Value.V2Pro == b.Value.V2Pro;
 
     private void UpdatePressed()
     {
-        ushort mask = Tele?.ButtonMask ?? 0;
+        int mask = Tele?.ButtonMask ?? 0;
         foreach (var b in S.Buttons) b.Pressed = (mask & (1 << b.Index)) != 0;
     }
 
@@ -396,7 +412,7 @@ public sealed class AppModel : ObservableObject, IDisposable
     public Func<bool>? ConfirmWithoutOriginal { get; set; }
 
     /// <summary>The original isn't saved yet, so show the warning on the Firmware page.</summary>
-    public bool ShowOriginalWarning => !HasStock;
+    public bool ShowOriginalWarning => !HasStock && !IsV2Pro;   // the saved original is the V1's image
 
     /// <summary>Flashing now would replace Razer's firmware with no way back (the controller still runs it, or is in update mode).</summary>
     public bool NeedsOriginal => !HasStock && Device != DeviceState.CustomFirmware;
@@ -428,6 +444,13 @@ public sealed class AppModel : ObservableObject, IDisposable
     private async Task RunFlowAsync(bool restoring)
     {
         if (!CanStart) return;
+        if (IsV2Pro)
+        {
+            // The V2 Pro's bootloader speaks Razer's protocol, not the V1's DFU; tools/v2pro_dfu.py flashes it.
+            ShowFirmwarePage?.Invoke();
+            Fail("The Kishi V2 Pro is flashed with tools/v2pro_dfu.py", "This app writes the Kishi V1's firmware only. Settings still apply live.");
+            return;
+        }
         Restoring = restoring;
         Log = "";
         Progress = 0;
@@ -459,6 +482,11 @@ public sealed class AppModel : ObservableObject, IDisposable
                 FlowDetail = "Unplug it, hold Y + B + Right Function, then plug it back in while holding.";
                 Phase = FlashPhase.WaitingForBootloader;
                 while (Monitor.State != DeviceState.Bootloader) await Task.Delay(150, ct);
+            }
+            if (Monitor.Model == KishiModel.V2Pro)
+            {
+                Fail("That is a Kishi V2 Pro", "This app flashes the Kishi V1 only; use tools/v2pro_dfu.py for the V2 Pro.");
+                return;
             }
             FlowTitle = "Bootloader detected";
             FlowDetail = restoring ? "Ready to restore the original Razer firmware." : "Ready to write your settings to the controller.";
